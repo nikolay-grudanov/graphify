@@ -279,6 +279,7 @@ Works with any mix of file types:
 | Type | Extensions | Extraction |
 |------|-----------|------------|
 | Code | `.py .ts .js .jsx .tsx .go .rs .java .c .cpp .rb .cs .kt .scala .php .swift .lua .zig .ps1 .ex .exs .m .mm .jl .vue .svelte` | AST via tree-sitter + call-graph + docstring/comment rationale |
+| Architecture | `.yaml .yml .dbml .puml .plantuml .pu` | OpenAPI, AsyncAPI, DBML, PlantUML parsing (see [CUSTOM_PARSERS.md](CUSTOM_PARSERS.md)) |
 | Docs | `.md .txt .rst` | Concepts + relationships + design rationale via Claude |
 | Office | `.docx .xlsx` | Converted to markdown then extracted via Claude (requires `pip install graphifyy[office]`) |
 | Papers | `.pdf` | Citation mining + concept extraction |

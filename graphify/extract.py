@@ -2867,6 +2867,213 @@ def extract_elixir(path: Path) -> dict:
     return {"nodes": nodes, "edges": clean_edges, "input_tokens": 0, "output_tokens": 0}
 
 
+# ── Custom artifact parsers (OpenAPI, AsyncAPI, DBML, PlantUML) ─────────────
+
+
+def extract_openapi(path: Path) -> dict:
+    """Extract nodes and edges from an OpenAPI 3.x YAML file using regex."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    nodes: list[dict] = []
+    edges: list[dict] = []
+    seen_ids: set[str] = set()
+
+    def add_node(name: str, ntype: str) -> str:
+        nid = _make_id("openapi", path.stem, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+        return nid
+
+    # Extract path entries (endpoints)
+    for m in re.finditer(r'^  (/[^\s:]+)\s*:', text, re.MULTILINE):
+        add_node(m.group(1), "endpoint")
+
+    # Extract operationId values
+    for m in re.finditer(r'operationId\s*:\s*["\']?(\w+)', text):
+        add_node(m.group(1), "operation")
+
+    # Extract schema names under components/schemas
+    schema_section = re.search(r'^components\s*:.*?^  schemas\s*:', text, re.MULTILINE | re.DOTALL)
+    if schema_section:
+        rest = text[schema_section.end():]
+        for m in re.finditer(r'^    (\w+)\s*:', rest, re.MULTILINE):
+            # Stop if we hit another top-level key (not indented)
+            line_start = rest[:m.start()].rfind('\n') + 1
+            if line_start > 0 and rest[line_start:m.start()].strip() == '' and not rest[line_start:].startswith('    '):
+                break
+            add_node(m.group(1), "schema")
+
+    # Extract $ref edges
+    for m in re.finditer(r'\$ref\s*:\s*["\']?#/components/schemas/(\w+)', text):
+        ref_name = m.group(1)
+        ref_nid = add_node(ref_name, "schema")
+        # Find nearest parent context (endpoint or operation)
+        preceding = text[:m.start()]
+        parent_match = None
+        for pm in re.finditer(r'^  (/[^\s:]+)\s*:', preceding, re.MULTILINE):
+            parent_match = pm
+        if parent_match:
+            parent_nid = _make_id("openapi", path.stem, parent_match.group(1))
+            if parent_nid in seen_ids:
+                edges.append({"source": parent_nid, "target": ref_nid, "type": "references", "label": "$ref"})
+
+    return {"nodes": nodes, "edges": edges}
+
+
+def extract_asyncapi(path: Path) -> dict:
+    """Extract nodes and edges from an AsyncAPI YAML file using regex."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    nodes: list[dict] = []
+    edges: list[dict] = []
+    seen_ids: set[str] = set()
+
+    def add_node(name: str, ntype: str) -> str:
+        nid = _make_id("asyncapi", path.stem, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+        return nid
+
+    # Extract channel entries
+    in_channels = False
+    current_channel = None
+    for line in text.splitlines():
+        stripped = line.strip()
+        # Detect channels: section
+        if re.match(r'^channels\s*:', line):
+            in_channels = True
+            continue
+        # Detect end of channels section (new top-level key)
+        if in_channels and re.match(r'^\S', line) and not re.match(r'^channels\s*:', line):
+            in_channels = False
+            current_channel = None
+            continue
+        if in_channels:
+            # Channel name (2-space indented)
+            ch_match = re.match(r'^  (\S[^\s:]*)\s*:', line)
+            if ch_match:
+                current_channel = ch_match.group(1)
+                add_node(current_channel, "channel")
+            # Operations: publish, subscribe, send, receive
+            op_match = re.match(r'^\s+(publish|subscribe|send|receive)\s*:', line)
+            if op_match and current_channel:
+                op_name = f"{current_channel}.{op_match.group(1)}"
+                op_nid = add_node(op_name, "operation")
+                ch_nid = _make_id("asyncapi", path.stem, current_channel)
+                edges.append({"source": ch_nid, "target": op_nid, "type": "has_operation", "label": op_match.group(1)})
+
+    # Extract $ref and message references
+    for m in re.finditer(r'\$ref\s*:\s*["\']?#/components/(?:messages|schemas)/(\w+)', text):
+        ref_name = m.group(1)
+        ref_nid = add_node(ref_name, "message")
+        # Link to nearest channel
+        preceding = text[:m.start()]
+        parent = None
+        for pm in re.finditer(r'^  (\S[^\s:]*)\s*:', preceding, re.MULTILINE):
+            parent = pm
+        if parent:
+            parent_nid = _make_id("asyncapi", path.stem, parent.group(1))
+            if parent_nid in seen_ids:
+                edges.append({"source": parent_nid, "target": ref_nid, "type": "references", "label": "$ref"})
+
+    return {"nodes": nodes, "edges": edges}
+
+
+def extract_dbml(path: Path) -> dict:
+    """Extract nodes and edges from a DBML file using regex."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    nodes: list[dict] = []
+    edges: list[dict] = []
+    seen_ids: set[str] = set()
+
+    def add_node(name: str, ntype: str) -> str:
+        nid = _make_id("dbml", path.stem, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+        return nid
+
+    # Extract tables and their columns
+    for tm in re.finditer(r'Table\s+(\w+)(?:\s+as\s+\w+)?\s*\{([^}]*)\}', text, re.DOTALL):
+        table_name = tm.group(1)
+        table_nid = add_node(table_name, "table")
+        body = tm.group(2)
+        for col_match in re.finditer(r'^\s+(\w+)\s+\w+', body, re.MULTILINE):
+            col_name = col_match.group(1)
+            col_nid = add_node(f"{table_name}.{col_name}", "column")
+            edges.append({"source": table_nid, "target": col_nid, "type": "has_column", "label": col_name})
+
+    # Extract Ref: lines for foreign keys
+    for rm in re.finditer(r'Ref\s*:\s*(\w+)\.(\w+)\s*[<>-]+\s*(\w+)\.(\w+)', text):
+        src_table = rm.group(1)
+        src_col = rm.group(2)
+        tgt_table = rm.group(3)
+        tgt_col = rm.group(4)
+        # Ensure both tables exist as nodes
+        src_nid = add_node(src_table, "table")
+        tgt_nid = add_node(tgt_table, "table")
+        edges.append({
+            "source": src_nid, "target": tgt_nid,
+            "type": "foreign_key",
+            "label": f"{src_table}.{src_col} -> {tgt_table}.{tgt_col}",
+        })
+
+    return {"nodes": nodes, "edges": edges}
+
+
+def extract_plantuml(path: Path) -> dict:
+    """Extract nodes and edges from a PlantUML file using regex."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    nodes: list[dict] = []
+    edges: list[dict] = []
+    seen_ids: set[str] = set()
+
+    def add_node(name: str, ntype: str) -> str:
+        nid = _make_id("puml", path.stem, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+        return nid
+
+    # Extract class, interface, component, actor declarations
+    for m in re.finditer(r'\b(class|interface|component|actor)\s+["\']?(\w+)', text):
+        add_node(m.group(2), m.group(1))
+
+    # Relationship type mapping
+    rel_map = {
+        "-->": "association",
+        "--|>": "inheritance",
+        "..>": "dependency",
+        "--*": "composition",
+        "--o": "aggregation",
+    }
+
+    # Extract relationships: A --> B, A --|> B, A ..> B, A --* B, A --o B
+    for m in re.finditer(r'(\w+)\s+(--\|>|-->|\.\.>|--\*|--o)\s+(\w+)', text):
+        src_name = m.group(1)
+        rel_symbol = m.group(2)
+        tgt_name = m.group(3)
+        src_nid = add_node(src_name, "class")
+        tgt_nid = add_node(tgt_name, "class")
+        rel_type = rel_map.get(rel_symbol, "association")
+        edges.append({"source": src_nid, "target": tgt_nid, "type": rel_type, "label": rel_symbol})
+
+    return {"nodes": nodes, "edges": edges}
+
+
+def extract_yaml_dispatch(path: Path) -> dict:
+    """Route YAML files to OpenAPI or AsyncAPI extractor based on content."""
+    try:
+        head = path.read_text(encoding="utf-8", errors="replace")[:500]
+    except Exception:
+        return {"nodes": [], "edges": []}
+    if re.search(r'openapi\s*:\s*["\']?3\.', head):
+        return extract_openapi(path)
+    if re.search(r'asyncapi\s*:\s*["\']?', head):
+        return extract_asyncapi(path)
+    return {"nodes": [], "edges": []}
+
+
 # ── Main extract and collect_files ────────────────────────────────────────────
 
 
@@ -2948,6 +3155,12 @@ def extract(paths: list[Path]) -> dict:
         ".vue": extract_js,
         ".svelte": extract_js,
         ".dart": extract_dart,
+        ".yaml":     extract_yaml_dispatch,
+        ".yml":      extract_yaml_dispatch,
+        ".dbml":     extract_dbml,
+        ".puml":     extract_plantuml,
+        ".plantuml": extract_plantuml,
+        ".pu":       extract_plantuml,
     }
 
     total = len(paths)
@@ -3007,6 +3220,7 @@ def collect_files(target: Path, *, follow_symlinks: bool = False, root: Path | N
         ".rb", ".cs", ".kt", ".kts", ".scala", ".php", ".swift",
         ".lua", ".toc", ".zig", ".ps1",
         ".m", ".mm",
+        ".yaml", ".yml", ".dbml", ".puml", ".plantuml", ".pu",
     }
     from graphify.detect import _load_graphifyignore, _is_ignored
     ignore_root = root if root is not None else target
