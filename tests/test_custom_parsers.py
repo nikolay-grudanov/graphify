@@ -817,3 +817,98 @@ class TestExtractPlantumlEnterprise:
         assert len(nce_edges) >= 1, (
             f"Expected at least 1 edge involving NCE; got {len(nce_edges)}"
         )
+
+    # ── Activity diagram tests (corporate_request_search.puml) ───────────
+
+    CORPORATE_SEARCH = ENTERPRISE_PUML / "corporate_request_search.puml"
+
+    def test_activity_diagram_parses_without_error(self):
+        """Activity diagram with nested ifs, colored actions, notes parses OK."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        assert "nodes" in result
+        assert "edges" in result
+
+    def test_activity_diagram_finds_action_nodes(self):
+        """Action nodes extracted from :text; syntax."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        action_labels = {n["label"] for n in result["nodes"] if n["type"] == "action"}
+        for expected in [
+            "Получение запроса на поиск данных",
+            "Поиск СФЛ по Email",
+            "Поиск контрагента по ОГРН",
+            "Поиск контрагента по ИНН",
+            "Поиск контрагента по наименованию",
+        ]:
+            assert expected in action_labels, (
+                f"Action '{expected}' not found; got {sorted(action_labels)}"
+            )
+
+    def test_activity_diagram_finds_decision_nodes(self):
+        """Decision/if nodes extracted from if (condition?) then syntax."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        decision_labels = {n["label"] for n in result["nodes"] if n["type"] == "decision"}
+        for expected in [
+            "В запросе есть email?",
+            "СФЛ найден?",
+            "Связь найдена?",
+        ]:
+            assert any(expected in d for d in decision_labels), (
+                f"Decision containing '{expected}' not found; got {sorted(decision_labels)}"
+            )
+
+    def test_activity_diagram_colored_actions(self):
+        """#pink: and #blue: colored actions are extracted with color stripped."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        action_labels = {n["label"] for n in result["nodes"] if n["type"] == "action"}
+        # #pink:Ошибка: недостаточно данных; → label should NOT start with #pink
+        assert any("Ошибка" in lbl for lbl in action_labels), (
+            f"Colored #pink action with 'Ошибка' not found; got {sorted(action_labels)}"
+        )
+        assert any("Переход к поиску сделки" in lbl for lbl in action_labels), (
+            f"Colored #blue action 'Переход к поиску сделки' not found; got {sorted(action_labels)}"
+        )
+        # Ensure color prefix is stripped
+        for lbl in action_labels:
+            assert not lbl.startswith("#"), (
+                f"Color prefix not stripped from action label: '{lbl}'"
+            )
+
+    def test_activity_diagram_total_nodes(self):
+        """Activity diagram yields 20+ nodes (12+ actions + 9+ decisions)."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        action_count = sum(1 for n in result["nodes"] if n["type"] == "action")
+        decision_count = sum(1 for n in result["nodes"] if n["type"] == "decision")
+        assert action_count >= 12, f"Expected >=12 action nodes; got {action_count}"
+        assert decision_count >= 9, f"Expected >=9 decision nodes; got {decision_count}"
+        total = action_count + decision_count
+        assert total >= 20, f"Expected >=20 total activity nodes; got {total}"
+
+    def test_activity_diagram_no_crash_on_nested_ifs(self):
+        """Deeply nested if/else/endif (4 levels) doesn't crash."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        # The file has 4 levels of nesting — just verify we get decisions
+        decisions = [n for n in result["nodes"] if n["type"] == "decision"]
+        assert len(decisions) >= 4, (
+            f"Expected >=4 decisions from nested ifs; got {len(decisions)}"
+        )
+
+    def test_activity_diagram_pragma_ignored(self):
+        """!pragma directive doesn't create garbage nodes."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        all_labels = {n["label"] for n in result["nodes"]}
+        for lbl in all_labels:
+            assert "pragma" not in lbl.lower(), (
+                f"Pragma directive leaked into node label: '{lbl}'"
+            )
+
+    def test_activity_diagram_comments_ignored(self):
+        """Single-line comments (' text) don't leak into nodes."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        all_labels = {n["label"] for n in result["nodes"]}
+        for lbl in all_labels:
+            assert "Блок поиска" not in lbl, (
+                f"Comment text leaked into node label: '{lbl}'"
+            )
+            assert "ничего не делаем" not in lbl, (
+                f"Comment text leaked into node label: '{lbl}'"
+            )

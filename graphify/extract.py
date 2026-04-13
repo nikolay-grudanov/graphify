@@ -14,7 +14,7 @@ from .cache import load_cached, save_cached
 def _make_id(*parts: str) -> str:
     """Build a stable node ID from one or more name parts."""
     combined = "_".join(p.strip("_.") for p in parts if p)
-    cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", combined)
+    cleaned = re.sub(r"[^\w]+", "_", combined)
     return cleaned.strip("_").lower()
 
 
@@ -3137,6 +3137,29 @@ def extract_plantuml(path: Path) -> dict:
         tgt_nid = add_node(tgt_name, "class")
         rel_type = rel_map.get(rel_symbol, "association")
         edges.append({"source": src_nid, "target": tgt_nid, "type": rel_type, "label": rel_symbol})
+
+    # ── Activity diagram support ─────────────────────────────────────────────
+    # Strip single-line notes first ("note left: ..." or "note right: ...")
+    # so they don't get caught by the multiline note regex.
+    stripped = re.sub(r'^\s*note\s+(?:left|right)\s*:.*$', '', text, flags=re.MULTILINE)
+    # Strip multiline notes (note left/right ... end note) so their content
+    # doesn't produce false action/decision matches.
+    stripped = re.sub(
+        r'^\s*note\s+(?:left|right)\s*\n.*?^\s*end\s+note',
+        '', stripped, flags=re.MULTILINE | re.DOTALL,
+    )
+
+    # Activity action nodes: :Action text; or #color:Action text;
+    for m in re.finditer(r'^\s*(?:#\w+)?:(.*?);', stripped, flags=re.MULTILINE):
+        label = m.group(1).strip()
+        if label:
+            add_node(label, "action")
+
+    # Activity decision nodes: if (condition?) then
+    for m in re.finditer(r'^\s*if\s*\((.+?)\)\s*then\b', stripped, flags=re.MULTILINE):
+        label = m.group(1).strip()
+        if label:
+            add_node(label, "decision")
 
     return {"nodes": nodes, "edges": edges}
 
