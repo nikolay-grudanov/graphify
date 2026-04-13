@@ -1,0 +1,23 @@
+openapi: 3.0.1
+info:
+  title: mock
+  version: 1.0.0
+servers:
+  - url: 'https://mock'
+paths:
+  /mock:
+    head:
+      x-allow-sigma: false
+      operationId: mock
+      summary: mock
+      responses:
+        '200':
+          description: mock
+# <---
+components:
+  schemas:
+    LocalDateTime:
+      type: string
+      format: date-time
+      description: Дата и время в формате ISO 8601
+      example: "2024-01-15T10:30:00"

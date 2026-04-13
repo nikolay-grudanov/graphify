@@ -24,6 +24,7 @@ SOCIAL = FIXTURES / "social.dbml"
 KFUL_SCHEMA = FIXTURES / "kful_schema.dbml"
 ARCHITECTURE = FIXTURES / "architecture.puml"
 MULTIFILE_ASYNCAPI = FIXTURES / "multifile_asyncapi"
+MULTIFILE_OPENAPI = FIXTURES / "multifile_openapi"
 
 
 # ── detect.py tests ──────────────────────────────────────────────────────────
@@ -467,3 +468,101 @@ class TestMultiFileAsyncAPI:
         channel_labels = {n["label"] for n in result["nodes"] if n["type"] == "channel"}
         for ch in ("lightingMeasured", "lightTurnOn", "lightTurnOff", "lightsDim"):
             assert ch in channel_labels, f"channel {ch!r} missing after multi-file changes"
+
+
+# ── Multi-file OpenAPI tests ────────────────────────────────────────────────
+
+
+class TestMultiFileOpenAPI:
+    """Test cross-file $ref resolution for multi-file OpenAPI specs."""
+
+    MAIN_SPEC = MULTIFILE_OPENAPI / "openapi" / "PreTrade" / "salesources-be" / "mass-send.yaml"
+
+    @pytest.fixture(autouse=True)
+    def _parse(self):
+        self.result = extract_yaml_dispatch(self.MAIN_SPEC)
+        self.nodes = self.result["nodes"]
+        self.edges = self.result["edges"]
+        self.node_labels = {n["label"] for n in self.nodes}
+        self.node_types = {n["label"]: n["type"] for n in self.nodes}
+
+    # 1. Endpoint node for /mass-send POST is found
+    def test_multifile_openapi_resolves_endpoint(self):
+        endpoint_labels = {n["label"] for n in self.nodes if n["type"] == "endpoint"}
+        assert "/mass-send" in endpoint_labels, (
+            f"endpoint '/mass-send' not found; got {sorted(endpoint_labels)}"
+        )
+
+    # 2. MassSendRqDto schema node is created (resolved from external $ref)
+    def test_multifile_openapi_resolves_request_schema(self):
+        schema_labels = {n["label"] for n in self.nodes if n["type"] == "schema"}
+        assert "MassSendRqDto" in schema_labels, (
+            f"schema 'MassSendRqDto' not found; got {sorted(schema_labels)}"
+        )
+
+    # 3. MassSendRsDto schema node is created
+    def test_multifile_openapi_resolves_response_schema(self):
+        schema_labels = {n["label"] for n in self.nodes if n["type"] == "schema"}
+        assert "MassSendRsDto" in schema_labels, (
+            f"schema 'MassSendRsDto' not found; got {sorted(schema_labels)}"
+        )
+
+    # 4. Deeply-nested refs are resolved (3 levels: main → RqDto → ObjectIds → ObjectId)
+    def test_multifile_openapi_deep_ref_chain(self):
+        schema_labels = {n["label"] for n in self.nodes if n["type"] == "schema"}
+        for name in ("LocalDateTime", "ObjectIds", "ObjectId"):
+            assert name in schema_labels, (
+                f"deep ref schema {name!r} not found; got {sorted(schema_labels)}"
+            )
+
+    # 5. Edges exist connecting endpoints to schemas (external_ref type)
+    def test_multifile_openapi_ref_edges(self):
+        ext_ref_edges = [e for e in self.edges if e["type"] == "external_ref"]
+        assert len(ext_ref_edges) >= 2, (
+            f"Expected at least 2 external_ref edges, got {len(ext_ref_edges)}: {ext_ref_edges}"
+        )
+        # At minimum, the main file should have edges to MassSendRqDto and MassSendRsDto
+        edge_labels = {e["label"] for e in ext_ref_edges}
+        assert any("MassSendRqDto" in lbl for lbl in edge_labels), (
+            f"No external_ref edge to MassSendRqDto; got {sorted(edge_labels)}"
+        )
+        assert any("MassSendRsDto" in lbl for lbl in edge_labels), (
+            f"No external_ref edge to MassSendRsDto; got {sorted(edge_labels)}"
+        )
+
+    # 6. No raw $ref strings remain in node labels
+    def test_multifile_openapi_no_unresolved_refs(self):
+        for n in self.nodes:
+            assert "$ref" not in n["label"], (
+                f"Unresolved $ref in node label: {n}"
+            )
+        for e in self.edges:
+            assert e["source"] != "", f"Empty source in edge: {e}"
+            assert e["target"] != "", f"Empty target in edge: {e}"
+
+    # 7. Multi-file produces more nodes than single-file (external schemas resolved)
+    def test_multifile_openapi_node_count(self):
+        assert len(self.nodes) >= 4, (
+            f"Expected at least 4 nodes from multi-file spec, got {len(self.nodes)}"
+        )
+        # Should have the endpoint plus multiple external schemas
+        schema_count = sum(1 for n in self.nodes if n["type"] == "schema")
+        assert schema_count >= 2, (
+            f"Expected at least 2 schema nodes (resolved external refs), got {schema_count}"
+        )
+
+    # 8. Single-file OpenAPI (petstore) still works correctly
+    def test_single_file_openapi_still_works(self):
+        result = extract_yaml_dispatch(PETSTORE)
+        direct = extract_openapi(PETSTORE)
+        # Dispatch result should contain at least everything from direct extraction
+        direct_labels = {n["label"] for n in direct["nodes"]}
+        dispatch_labels = {n["label"] for n in result["nodes"]}
+        assert direct_labels.issubset(dispatch_labels), (
+            f"Single-file OpenAPI dispatch missing nodes: "
+            f"{direct_labels - dispatch_labels}"
+        )
+        # Endpoints should still be present
+        endpoint_labels = {n["label"] for n in result["nodes"] if n["type"] == "endpoint"}
+        for ep in ("/pet", "/pet/findByStatus", "/store/inventory", "/user"):
+            assert ep in endpoint_labels, f"endpoint {ep!r} missing after multi-file changes"

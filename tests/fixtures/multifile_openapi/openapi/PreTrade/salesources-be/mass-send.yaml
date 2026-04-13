@@ -1,0 +1,34 @@
+openapi: 3.0.1
+info:
+  title: MassSend
+  version: 1.1.0
+  description: Описание работы с микросервисом salesources-be
+
+
+servers:
+  - url: "{serviceName}"
+    variables:
+      serviceName:
+        default: salesources-be
+
+
+paths:
+  /mass-send:
+    post:
+      summary: Запрос на массовую выгрузку проектов продаж CIB
+      description: Запрос на массовую выгрузку проектов продаж CIB
+      operationId: getSaleSourcesMassSend
+      x-allow-sigma: false
+      x-send-to-audit: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: ../models/mass-send/MassSendRqDto.yaml#/components/schemas/MassSendRqDto
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: ../models/mass-send/MassSendRsDto.yaml#/components/schemas/MassSendRsDto
