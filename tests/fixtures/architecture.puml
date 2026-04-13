@@ -1,0 +1,39 @@
+@startuml
+title System Architecture
+
+interface IRepository
+interface IService
+
+class UserService
+class OrderService
+class PaymentGateway
+class UserRepository
+class OrderRepository
+
+actor Customer
+actor Admin
+
+component AuthModule
+component NotificationModule
+
+Customer --> UserService
+Customer --> OrderService
+Admin --> UserService
+Admin --|> Customer
+
+UserService --|> IService
+OrderService --|> IService
+UserRepository --|> IRepository
+OrderRepository --|> IRepository
+
+UserService --> UserRepository
+OrderService --> OrderRepository
+OrderService --> PaymentGateway
+OrderService ..> NotificationModule
+PaymentGateway ..> NotificationModule
+
+AuthModule --> UserService
+AuthModule --* UserRepository
+NotificationModule --o OrderService
+
+@enduml

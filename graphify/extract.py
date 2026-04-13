@@ -2878,7 +2878,7 @@ def extract_openapi(path: Path) -> dict:
     seen_ids: set[str] = set()
 
     def add_node(name: str, ntype: str) -> str:
-        nid = _make_id("openapi", path.stem, name)
+        nid = _make_id("openapi", path.stem, ntype, name)
         if nid not in seen_ids:
             seen_ids.add(nid)
             nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
@@ -2896,12 +2896,16 @@ def extract_openapi(path: Path) -> dict:
     schema_section = re.search(r'^components\s*:.*?^  schemas\s*:', text, re.MULTILINE | re.DOTALL)
     if schema_section:
         rest = text[schema_section.end():]
-        for m in re.finditer(r'^    (\w+)\s*:', rest, re.MULTILINE):
-            # Stop if we hit another top-level key (not indented)
-            line_start = rest[:m.start()].rfind('\n') + 1
-            if line_start > 0 and rest[line_start:m.start()].strip() == '' and not rest[line_start:].startswith('    '):
+        for line in rest.splitlines():
+            # Stop at next sibling section (2-space indent) or top-level key (no indent)
+            if line and not line.startswith('    ') and not line.startswith('  ') and not line[0].isspace():
                 break
-            add_node(m.group(1), "schema")
+            if line.startswith('  ') and not line.startswith('    ') and line.strip() and not line.strip().startswith('#'):
+                break
+            # Schema names are at exactly 4-space indent
+            m = re.match(r'^    ([A-Z]\w*)\s*:', line)
+            if m:
+                add_node(m.group(1), "schema")
 
     # Extract $ref edges
     for m in re.finditer(r'\$ref\s*:\s*["\']?#/components/schemas/(\w+)', text):
@@ -2913,7 +2917,7 @@ def extract_openapi(path: Path) -> dict:
         for pm in re.finditer(r'^  (/[^\s:]+)\s*:', preceding, re.MULTILINE):
             parent_match = pm
         if parent_match:
-            parent_nid = _make_id("openapi", path.stem, parent_match.group(1))
+            parent_nid = _make_id("openapi", path.stem, "endpoint", parent_match.group(1))
             if parent_nid in seen_ids:
                 edges.append({"source": parent_nid, "target": ref_nid, "type": "references", "label": "$ref"})
 
@@ -3003,8 +3007,8 @@ def extract_dbml(path: Path) -> dict:
             col_nid = add_node(f"{table_name}.{col_name}", "column")
             edges.append({"source": table_nid, "target": col_nid, "type": "has_column", "label": col_name})
 
-    # Extract Ref: lines for foreign keys
-    for rm in re.finditer(r'Ref\s*:\s*(\w+)\.(\w+)\s*[<>-]+\s*(\w+)\.(\w+)', text):
+    # Extract Ref: lines for foreign keys (handles optional ref names like "Ref name:")
+    for rm in re.finditer(r'Ref(?:\s+\w+)?\s*:\s*(\w+)\.(\w+)\s*[<>-]+\s*(\w+)\.(\w+)', text):
         src_table = rm.group(1)
         src_col = rm.group(2)
         tgt_table = rm.group(3)
