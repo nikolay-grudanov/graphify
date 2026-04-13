@@ -25,6 +25,7 @@ KFUL_SCHEMA = FIXTURES / "kful_schema.dbml"
 ARCHITECTURE = FIXTURES / "architecture.puml"
 MULTIFILE_ASYNCAPI = FIXTURES / "multifile_asyncapi"
 MULTIFILE_OPENAPI = FIXTURES / "multifile_openapi"
+ENTERPRISE_PUML = FIXTURES / "enterprise_puml"
 
 
 # ── detect.py tests ──────────────────────────────────────────────────────────
@@ -566,3 +567,114 @@ class TestMultiFileOpenAPI:
         endpoint_labels = {n["label"] for n in result["nodes"] if n["type"] == "endpoint"}
         for ep in ("/pet", "/pet/findByStatus", "/store/inventory", "/user"):
             assert ep in endpoint_labels, f"endpoint {ep!r} missing after multi-file changes"
+
+
+# ── Enterprise PlantUML sequence diagram tests ────────────────────────────
+
+
+class TestExtractPlantumlEnterprise:
+    """Test extract_plantuml on enterprise sequence diagrams with complex syntax.
+
+    These fixtures use participant declarations with quoted names + aliases,
+    sequence diagram arrows (-> <-> -->), alt/else blocks, notes, !include
+    directives, ref-over frames, destroy keywords, and Cyrillic text.
+    The parser was built for class/component diagrams, so sequence-diagram-
+    specific constructs (alt/else, notes, ref over, destroy) are silently
+    ignored — we verify no crashes and that participants/arrows are extracted.
+    """
+
+    PAYMENT_DELETE = ENTERPRISE_PUML / "payment_delete.puml"
+    REESTR = ENTERPRISE_PUML / "payments_reestr_full_list.puml"
+
+    # ── payment_delete.puml ──────────────────────────────────────────────
+
+    def test_payment_delete_parses_without_error(self):
+        """Parser must not crash on complex sequence diagram syntax."""
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        assert isinstance(result, dict)
+        assert "nodes" in result and "edges" in result
+
+    def test_payment_delete_finds_actors(self):
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        actor_labels = {n["label"] for n in result["nodes"] if n["type"] == "actor"}
+        assert "User" in actor_labels, f"actor 'User' not found; got {sorted(actor_labels)}"
+
+    def test_payment_delete_finds_participants(self):
+        """Participant declarations with quoted names and aliases are extracted."""
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        participant_labels = {n["label"] for n in result["nodes"] if n["type"] == "participant"}
+        assert "IB_P_FE" in participant_labels, (
+            f"participant 'IB_P_FE' not found; got {sorted(participant_labels)}"
+        )
+        assert "IB_P_BE" in participant_labels, (
+            f"participant 'IB_P_BE' not found; got {sorted(participant_labels)}"
+        )
+
+    def test_payment_delete_returns_nodes(self):
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        # 1 actor (User) + 2 participants (IB_P_FE, IB_P_BE) = 3 declared entities
+        assert len(result["nodes"]) >= 3, (
+            f"Expected at least 3 nodes (1 actor + 2 participants), got {len(result['nodes'])}"
+        )
+
+    def test_payment_delete_returns_edges(self):
+        """Sequence diagram arrows (-> <->) are captured as edges."""
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        assert len(result["edges"]) > 0, "Expected edges from sequence diagram arrows"
+        edge_types = {e["type"] for e in result["edges"]}
+        # The file contains -> (message) and <-> (bidirectional) arrows
+        assert "message" in edge_types or "bidirectional" in edge_types, (
+            f"Expected 'message' or 'bidirectional' edge types; got {sorted(edge_types)}"
+        )
+
+    # ── payments_reestr_full_list.puml ───────────────────────────────────
+
+    def test_reestr_finds_all_participants(self):
+        """The reestr file declares 4 participants + 1 actor = 5 entities."""
+        result = extract_plantuml(self.REESTR)
+        participant_labels = {n["label"] for n in result["nodes"] if n["type"] == "participant"}
+        for name in ("IB_P_FE", "IB_P_BE", "IBV_BE", "ST_BE"):
+            assert name in participant_labels, (
+                f"participant {name!r} not found; got {sorted(participant_labels)}"
+            )
+        actor_labels = {n["label"] for n in result["nodes"] if n["type"] == "actor"}
+        # Actor is declared as: actor Пользователь as user
+        # The parser captures the first word after 'actor' = Пользователь
+        assert "Пользователь" in actor_labels, (
+            f"actor 'Пользователь' not found; got {sorted(actor_labels)}"
+        )
+
+    def test_reestr_self_call_edges(self):
+        """Self-calls like IBV_BE -> IBV_BE are captured as edges."""
+        result = extract_plantuml(self.REESTR)
+        self_edges = [e for e in result["edges"] if e["source"] == e["target"]]
+        assert len(self_edges) >= 2, (
+            f"Expected at least 2 self-call edges; got {len(self_edges)}"
+        )
+
+    def test_reestr_returns_nodes_and_edges(self):
+        result = extract_plantuml(self.REESTR)
+        assert len(result["nodes"]) > 0, "Expected at least one node"
+        assert len(result["edges"]) > 0, "Expected at least one edge"
+
+    # ── Cross-cutting concerns ──────────────────────────────────────────
+
+    def test_include_directives_ignored(self):
+        """!include lines must not cause errors or produce garbage nodes."""
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        for n in result["nodes"]:
+            assert "include" not in n["label"].lower(), (
+                f"!include directive leaked into node: {n}"
+            )
+            assert "skinparam" not in n["label"].lower(), (
+                f"skinparam directive leaked into node: {n}"
+            )
+
+    def test_cyrillic_labels_handled(self):
+        """Nodes with Cyrillic labels are handled without errors."""
+        result = extract_plantuml(self.REESTR)
+        # The actor "Пользователь" has a Cyrillic name
+        all_labels = {n["label"] for n in result["nodes"]}
+        assert "Пользователь" in all_labels, (
+            f"Cyrillic label 'Пользователь' not found; got {sorted(all_labels)}"
+        )

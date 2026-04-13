@@ -3103,6 +3103,17 @@ def extract_plantuml(path: Path) -> dict:
     for m in re.finditer(r'\b(class|interface|component|actor)\s+["\']?(\w+)', text):
         add_node(m.group(2), m.group(1))
 
+    # Extract participant declarations: participant "Label" as Alias, or participant Alias
+    for m in re.finditer(
+        r'\bparticipant\s+'
+        r'(?:"[^"]*"|\'[^\']*\')\s+as\s+(\w+)'  # quoted name with alias
+        r'|\bparticipant\s+(\w+)',                # bare name
+        text,
+    ):
+        name = m.group(1) or m.group(2)
+        if name:
+            add_node(name, "participant")
+
     # Relationship type mapping
     rel_map = {
         "-->": "association",
@@ -3110,10 +3121,14 @@ def extract_plantuml(path: Path) -> dict:
         "..>": "dependency",
         "--*": "composition",
         "--o": "aggregation",
+        "->": "message",
+        "<->": "bidirectional",
+        "<--": "return",
     }
 
-    # Extract relationships: A --> B, A --|> B, A ..> B, A --* B, A --o B
-    for m in re.finditer(r'(\w+)\s+(--\|>|-->|\.\.>|--\*|--o)\s+(\w+)', text):
+    # Extract relationships: A --> B, A --|> B, A ..> B, A --* B, A --o B,
+    # and sequence diagram arrows: A -> B, A <-> B, A <-- B
+    for m in re.finditer(r'(\w+)\s+(--\|>|<->|-->|<--|->|\.\.>|--\*|--o)\s+(\w+)', text):
         src_name = m.group(1)
         rel_symbol = m.group(2)
         tgt_name = m.group(3)
