@@ -678,3 +678,142 @@ class TestExtractPlantumlEnterprise:
         assert "Пользователь" in all_labels, (
             f"Cyrillic label 'Пользователь' not found; got {sorted(all_labels)}"
         )
+
+    # ── corporate_request_edit.puml ─────────────────────────────────────
+
+    CORPORATE_EDIT = ENTERPRISE_PUML / "corporate_request_edit.puml"
+    MASS_SEND = ENTERPRISE_PUML / "corporate_request_mass_send.puml"
+
+    def test_corporate_edit_parses_without_error(self):
+        """Parser must not crash on autonumber, activate/deactivate, inline [[links]], etc."""
+        result = extract_plantuml(self.CORPORATE_EDIT)
+        assert isinstance(result, dict)
+        assert "nodes" in result and "edges" in result
+        assert len(result["nodes"]) > 0
+
+    def test_corporate_edit_finds_actors_and_participants(self):
+        """Actor 'Пользователь'/User + participants CR_APP and CR_BE are found."""
+        result = extract_plantuml(self.CORPORATE_EDIT)
+        actor_labels = {n["label"] for n in result["nodes"] if n["type"] == "actor"}
+        participant_labels = {n["label"] for n in result["nodes"] if n["type"] == "participant"}
+        # The actor is declared as: actor "Пользователь" as User order 10
+        # The regex captures the quoted name "Пользователь"
+        assert "Пользователь" in actor_labels, (
+            f"actor 'Пользователь' not found; got {sorted(actor_labels)}"
+        )
+        assert "CR_APP" in participant_labels, (
+            f"participant 'CR_APP' not found; got {sorted(participant_labels)}"
+        )
+        assert "CR_BE" in participant_labels, (
+            f"participant 'CR_BE' not found; got {sorted(participant_labels)}"
+        )
+
+    def test_corporate_edit_activate_deactivate_no_crash(self):
+        """activate/deactivate keywords don't crash or create garbage nodes."""
+        result = extract_plantuml(self.CORPORATE_EDIT)
+        all_labels = {n["label"] for n in result["nodes"]}
+        # activate/deactivate are directives, not entities
+        for label in all_labels:
+            assert "activate" not in label.lower(), (
+                f"activate directive leaked into node: {label}"
+            )
+            assert "deactivate" not in label.lower(), (
+                f"deactivate directive leaked into node: {label}"
+            )
+
+    def test_corporate_edit_edges_count(self):
+        """Verify edge count is reasonable — arrows for User->CR_APP, CR_APP->CR_BE, self-calls, etc."""
+        result = extract_plantuml(self.CORPORATE_EDIT)
+        # The file has many arrows: User->CR_APP, CR_APP->CR_BE, CR_BE->CR_APP,
+        # CR_APP->CR_APP (self-calls), CR_APP-->User (return), plus error handling alt blocks
+        assert len(result["edges"]) >= 10, (
+            f"Expected at least 10 edges; got {len(result['edges'])}"
+        )
+        # Verify self-call edges exist (CR_APP -> CR_APP)
+        self_edges = [e for e in result["edges"] if e["source"] == e["target"]]
+        assert len(self_edges) >= 1, (
+            f"Expected at least 1 self-call edge; got {len(self_edges)}"
+        )
+
+    def test_corporate_edit_inline_links_no_crash(self):
+        """[[...]] hyperlinks inside arrow labels don't crash the parser."""
+        result = extract_plantuml(self.CORPORATE_EDIT)
+        # The file contains arrows with [[link.puml label]] in the text
+        # These should not produce garbage nodes
+        for n in result["nodes"]:
+            assert "[[" not in n["label"], (
+                f"Inline [[link]] leaked into node label: {n}"
+            )
+            assert "]]" not in n["label"], (
+                f"Inline [[link]] leaked into node label: {n}"
+            )
+
+    # ── corporate_request_mass_send.puml ────────────────────────────────
+
+    def test_mass_send_parses_without_error(self):
+        """Parser must not crash on box/end box, queue, loop, sprites."""
+        result = extract_plantuml(self.MASS_SEND)
+        assert isinstance(result, dict)
+        assert "nodes" in result and "edges" in result
+        assert len(result["nodes"]) > 0
+
+    def test_mass_send_finds_participants(self):
+        """SOMETHING and CR_BE participants are found."""
+        result = extract_plantuml(self.MASS_SEND)
+        participant_labels = {n["label"] for n in result["nodes"] if n["type"] == "participant"}
+        assert "SOMETHING" in participant_labels, (
+            f"participant 'SOMETHING' not found; got {sorted(participant_labels)}"
+        )
+        assert "CR_BE" in participant_labels, (
+            f"participant 'CR_BE' not found; got {sorted(participant_labels)}"
+        )
+
+    def test_mass_send_queue_handling(self):
+        """queue keyword is extracted as a participant (same semantics)."""
+        result = extract_plantuml(self.MASS_SEND)
+        participant_labels = {n["label"] for n in result["nodes"] if n["type"] == "participant"}
+        # queue "NOTIFICATIONS.NOTIFICATION_COMMANDS" as Q_NC order 200
+        # Parser supports queue keyword — alias Q_NC should be extracted
+        assert "Q_NC" in participant_labels, (
+            f"queue alias 'Q_NC' not found as participant; got {sorted(participant_labels)}"
+        )
+
+    def test_mass_send_box_no_crash(self):
+        """box ... end box syntax doesn't create garbage nodes or crash."""
+        result = extract_plantuml(self.MASS_SEND)
+        all_labels = {n["label"] for n in result["nodes"]}
+        for label in all_labels:
+            assert "box" not in label.lower() or label in ("box",), (
+                f"box directive leaked into node: {label}"
+            )
+            # Sprite references like <$kafka> should not leak
+            assert "<$" not in label, (
+                f"Sprite reference leaked into node: {label}"
+            )
+
+    def test_mass_send_loop_no_crash(self):
+        """loop ... end block doesn't crash or create garbage nodes."""
+        result = extract_plantuml(self.MASS_SEND)
+        all_labels = {n["label"] for n in result["nodes"]}
+        for label in all_labels:
+            assert "loop" not in label.lower(), (
+                f"loop directive leaked into node: {label}"
+            )
+
+    def test_mass_send_undeclared_participant_edge(self):
+        """Arrow to undeclared NCE doesn't crash; NCE appears as auto-created node."""
+        result = extract_plantuml(self.MASS_SEND)
+        all_labels = {n["label"] for n in result["nodes"]}
+        # NCE is not declared but appears in: CR_BE -> NCE
+        # The relationship regex auto-creates it as a "class" node
+        assert "NCE" in all_labels, (
+            f"Undeclared participant 'NCE' not found in nodes; got {sorted(all_labels)}"
+        )
+        # Verify the edge exists
+        nce_edges = [
+            e for e in result["edges"]
+            if "nce" in e["source"].lower() or "nce" in e["target"].lower()
+        ]
+        assert len(nce_edges) >= 1, (
+            f"Expected at least 1 edge involving NCE; got {len(nce_edges)}"
+        )

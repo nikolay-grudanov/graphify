@@ -3103,11 +3103,12 @@ def extract_plantuml(path: Path) -> dict:
     for m in re.finditer(r'\b(class|interface|component|actor)\s+["\']?(\w+)', text):
         add_node(m.group(2), m.group(1))
 
-    # Extract participant declarations: participant "Label" as Alias, or participant Alias
+    # Extract participant/queue declarations: participant "Label" as Alias, or participant Alias
+    # Also handles 'queue' keyword which is semantically equivalent to participant
     for m in re.finditer(
-        r'\bparticipant\s+'
+        r'\b(?:participant|queue)\s+'
         r'(?:"[^"]*"|\'[^\']*\')\s+as\s+(\w+)'  # quoted name with alias
-        r'|\bparticipant\s+(\w+)',                # bare name
+        r'|\b(?:participant|queue)\s+(\w+)',      # bare name
         text,
     ):
         name = m.group(1) or m.group(2)
