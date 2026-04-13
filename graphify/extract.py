@@ -3125,16 +3125,181 @@ def extract_plantuml(path: Path) -> dict:
     return {"nodes": nodes, "edges": edges}
 
 
+# ── Cross-file $ref resolution ───────────────────────────────────────────────
+
+
+def _resolve_external_refs(
+    path: Path,
+    nodes: list[dict],
+    edges: list[dict],
+    seen_ids: set[str],
+    prefix: str,
+    *,
+    _visited: set[str] | None = None,
+) -> None:
+    """Scan a YAML file for external $ref links, create edges and recurse.
+
+    External refs look like:
+        $ref: ../path/to/file.yaml#/components/schemas/Name
+        $ref: ./models/Dto.yaml#/components/schemas/Dto
+
+    For each external ref we:
+    1. Create a node for the referenced entity (schema/message).
+    2. Create an ``external_ref`` edge from the nearest context node to the target.
+    3. Recursively parse the referenced file (guarded by *_visited* to prevent cycles).
+    """
+    if _visited is None:
+        _visited = set()
+    resolved = str(path.resolve())
+    if resolved in _visited:
+        return
+    _visited.add(resolved)
+
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return
+
+    def _add_node(name: str, ntype: str, source_file: Path) -> str:
+        nid = _make_id(prefix, source_file.stem, ntype, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(source_file)})
+        return nid
+
+    # Find all external $ref (contain a file path, not starting with #)
+    for m in re.finditer(
+        r'\$ref\s*:\s*["\']?'
+        r'([^#"\'>\s]+)'           # file path part
+        r'#/components/(?:schemas|messages)/'
+        r'(\w+)',                   # entity name
+        text,
+    ):
+        rel_path = m.group(1).strip()
+        entity_name = m.group(2)
+
+        # Resolve relative to the current file's directory
+        target_file = (path.parent / rel_path).resolve()
+        if not target_file.exists():
+            continue
+
+        # Create node for the referenced entity
+        ref_nid = _add_node(entity_name, "schema", target_file)
+
+        # Find nearest context node to use as edge source
+        preceding = text[:m.start()]
+        # Try channel-style context (2-space indent key)
+        parent_match = None
+        for pm in re.finditer(r'^  (\S[^\s:]*)\s*:', preceding, re.MULTILINE):
+            parent_match = pm
+        # Try top-level key for channel.yaml files (address:, messages:)
+        if parent_match is None:
+            for pm in re.finditer(r'^(\w[^\s:]*)\s*:', preceding, re.MULTILINE):
+                parent_match = pm
+        if parent_match:
+            parent_name = parent_match.group(1)
+            parent_nid = _make_id(prefix, path.stem, "channel", parent_name)
+            if parent_nid not in seen_ids:
+                parent_nid = _make_id(prefix, path.stem, "endpoint", parent_name)
+            if parent_nid not in seen_ids:
+                # Fallback: create a generic context node
+                parent_nid = _add_node(parent_name, "context", path)
+            edges.append({
+                "source": parent_nid, "target": ref_nid,
+                "type": "external_ref", "label": f"$ref -> {entity_name}",
+            })
+
+        # Recursively parse the target file
+        _resolve_external_refs(
+            target_file, nodes, edges, seen_ids, prefix, _visited=_visited,
+        )
+
+    # Also handle channel $ref (AsyncAPI channels referencing external channel.yaml)
+    for m in re.finditer(
+        r'\$ref\s*:\s*["\']?([^#"\'>\s]+\.yaml)\s*["\']?',
+        text,
+    ):
+        rel_path = m.group(1).strip()
+        if rel_path.startswith('#'):
+            continue
+        target_file = (path.parent / rel_path).resolve()
+        if not target_file.exists():
+            continue
+
+        # Parse the channel file for its own nodes
+        _parse_channel_file(target_file, nodes, edges, seen_ids, prefix)
+
+        # And recurse into it for its external refs
+        _resolve_external_refs(
+            target_file, nodes, edges, seen_ids, prefix, _visited=_visited,
+        )
+
+
+def _parse_channel_file(
+    path: Path,
+    nodes: list[dict],
+    edges: list[dict],
+    seen_ids: set[str],
+    prefix: str,
+) -> None:
+    """Parse a standalone AsyncAPI channel.yaml file (no asyncapi: header).
+
+    These files typically have: address, description, messages, parameters.
+    """
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return
+
+    def _add_node(name: str, ntype: str) -> str:
+        nid = _make_id(prefix, path.stem, ntype, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+        return nid
+
+    # Extract address as channel name
+    addr_m = re.search(r'^address\s*:\s*(.+)', text, re.MULTILINE)
+    if addr_m:
+        channel_name = addr_m.group(1).strip()
+        _add_node(channel_name, "channel")
+
+    # Extract message names
+    for mm in re.finditer(r'^  (\w+)\s*:', text, re.MULTILINE):
+        # Only under messages: section
+        preceding = text[:mm.start()]
+        if 'messages:' in preceding.split('\n')[-5:].__repr__():
+            msg_name = mm.group(1)
+            if msg_name not in ('name', 'title', 'contentType', 'headers', 'payload', 'description', 'summary', 'traits'):
+                _add_node(msg_name, "message")
+
+
 def extract_yaml_dispatch(path: Path) -> dict:
-    """Route YAML files to OpenAPI or AsyncAPI extractor based on content."""
+    """Route YAML files to OpenAPI or AsyncAPI extractor based on content.
+
+    After the primary extraction, resolves external $ref links to build
+    cross-file edges and recursively extract nodes from referenced files.
+    """
     try:
         head = path.read_text(encoding="utf-8", errors="replace")[:500]
     except Exception:
         return {"nodes": [], "edges": []}
     if re.search(r'openapi\s*:\s*["\']?3\.', head):
-        return extract_openapi(path)
+        result = extract_openapi(path)
+        # Resolve cross-file refs for OpenAPI too
+        _resolve_external_refs(
+            path, result["nodes"], result["edges"],
+            {n["id"] for n in result["nodes"]}, "openapi",
+        )
+        return result
     if re.search(r'asyncapi\s*:\s*["\']?', head):
-        return extract_asyncapi(path)
+        result = extract_asyncapi(path)
+        # Resolve cross-file refs
+        _resolve_external_refs(
+            path, result["nodes"], result["edges"],
+            {n["id"] for n in result["nodes"]}, "asyncapi",
+        )
+        return result
     return {"nodes": [], "edges": []}
 
 

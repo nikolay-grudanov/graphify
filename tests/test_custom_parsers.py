@@ -10,6 +10,9 @@ from graphify.extract import (
     extract_dbml,
     extract_plantuml,
     extract_yaml_dispatch,
+    _resolve_external_refs,
+    _parse_channel_file,
+    _make_id,
 )
 from graphify.detect import classify_file, classify_yaml, FileType
 
@@ -20,6 +23,7 @@ STREETLIGHTS = FIXTURES / "streetlights.yaml"
 SOCIAL = FIXTURES / "social.dbml"
 KFUL_SCHEMA = FIXTURES / "kful_schema.dbml"
 ARCHITECTURE = FIXTURES / "architecture.puml"
+MULTIFILE_ASYNCAPI = FIXTURES / "multifile_asyncapi"
 
 
 # ── detect.py tests ──────────────────────────────────────────────────────────
@@ -322,3 +326,144 @@ class TestYamlDispatch:
         plain.write_text("name: test\nversion: 1\n")
         result = extract_yaml_dispatch(plain)
         assert result == {"nodes": [], "edges": []}
+
+
+# ── Multi-file AsyncAPI tests ───────────────────────────────────────────────
+
+
+class TestMultiFileAsyncAPI:
+    """Test cross-file $ref resolution for multi-file AsyncAPI specs."""
+
+    MAIN_SPEC = MULTIFILE_ASYNCAPI / "specs" / "asyncapi.yaml"
+
+    @pytest.fixture(autouse=True)
+    def _parse(self):
+        self.result = extract_yaml_dispatch(self.MAIN_SPEC)
+        self.nodes = self.result["nodes"]
+        self.edges = self.result["edges"]
+        self.node_labels = {n["label"] for n in self.nodes}
+        self.node_types = {n["label"]: n["type"] for n in self.nodes}
+
+    # 1. Channels resolved from external $ref channel.yaml files
+    def test_multifile_resolves_channels(self):
+        channel_labels = {n["label"] for n in self.nodes if n["type"] == "channel"}
+        assert "KFULSOURCES.KFUL.KFUL_OPPORTUNITY_STATE" in channel_labels
+        assert "KFULSOURCES.KFUL.MASS_SEND" in channel_labels
+
+    # 2. Model/schema nodes created from recursively resolved external refs
+    def test_multifile_resolves_models(self):
+        schema_labels = {n["label"] for n in self.nodes if n["type"] == "schema"}
+        assert "KfulOpportunityStateDto" in schema_labels
+        assert "MassSendDto" in schema_labels
+        assert "KafkaHeaders" in schema_labels
+
+    # 3. Edges connecting channel context to models
+    def test_multifile_channel_edges(self):
+        edge_targets = {e["target"] for e in self.edges if e["type"] == "external_ref"}
+        # Should have edges pointing to the three schema nodes
+        schema_ids = {n["id"] for n in self.nodes if n["type"] == "schema"}
+        assert len(edge_targets & schema_ids) >= 3, (
+            f"Expected at least 3 external_ref edges to schemas, "
+            f"got targets={edge_targets}, schemas={schema_ids}"
+        )
+
+    # 4. No unresolved $ref strings remain as raw node labels
+    def test_multifile_no_unresolved_refs(self):
+        for n in self.nodes:
+            assert "$ref" not in n["label"], (
+                f"Unresolved $ref in node label: {n}"
+            )
+        for e in self.edges:
+            assert e["source"] != "", f"Empty source in edge: {e}"
+            assert e["target"] != "", f"Empty target in edge: {e}"
+
+    # 5. Reasonable counts of nodes and edges (multi-file produces more than single)
+    def test_multifile_total_nodes_and_edges(self):
+        assert len(self.nodes) >= 8, (
+            f"Expected at least 8 nodes from multi-file spec, got {len(self.nodes)}"
+        )
+        assert len(self.edges) >= 3, (
+            f"Expected at least 3 edges from multi-file spec, got {len(self.edges)}"
+        )
+        # Multi-file should produce more nodes than the 2 channels alone
+        channel_count = sum(1 for n in self.nodes if n["type"] == "channel")
+        non_channel_count = len(self.nodes) - channel_count
+        assert non_channel_count >= 3, (
+            f"Expected at least 3 non-channel nodes (schemas, messages, etc), "
+            f"got {non_channel_count}"
+        )
+
+    # 6. Cycle prevention: A refs B, B refs A — no infinite loop
+    def test_resolve_external_refs_cycle_prevention(self, tmp_path):
+        # Create two files that reference each other
+        file_a = tmp_path / "a.yaml"
+        file_b = tmp_path / "b.yaml"
+
+        file_a.write_text(
+            "asyncapi: 3.0.0\n"
+            "channels:\n"
+            "  TestChannel:\n"
+            "    messages:\n"
+            "      payload:\n"
+            f"        $ref: ./b.yaml#/components/schemas/ModelB\n"
+        )
+        file_b.write_text(
+            "components:\n"
+            "  schemas:\n"
+            "    ModelB:\n"
+            "      type: object\n"
+            "      properties:\n"
+            "        back_ref:\n"
+            f"          $ref: ./a.yaml#/components/schemas/ModelA\n"
+        )
+
+        nodes: list[dict] = []
+        edges: list[dict] = []
+        seen_ids: set[str] = set()
+
+        # Should complete without hanging or raising
+        _resolve_external_refs(file_a, nodes, edges, seen_ids, "test")
+
+        # Verify it produced some output without looping forever
+        assert isinstance(nodes, list)
+        assert isinstance(edges, list)
+
+    # 7. Graceful handling when $ref points to nonexistent file
+    def test_resolve_external_refs_missing_file(self, tmp_path):
+        spec = tmp_path / "spec.yaml"
+        spec.write_text(
+            "asyncapi: 3.0.0\n"
+            "channels:\n"
+            "  TestChannel:\n"
+            "    $ref: ./nonexistent/channel.yaml\n"
+            "    messages:\n"
+            "      payload:\n"
+            "        $ref: ./does_not_exist.yaml#/components/schemas/Ghost\n"
+        )
+
+        nodes: list[dict] = []
+        edges: list[dict] = []
+        seen_ids: set[str] = set()
+
+        # Should not raise — missing files are silently skipped
+        _resolve_external_refs(spec, nodes, edges, seen_ids, "test")
+
+        # No nodes or edges created for missing refs
+        ghost_labels = {n["label"] for n in nodes}
+        assert "Ghost" not in ghost_labels, "Should not create node for missing file ref"
+
+    # 8. Single-file AsyncAPI still works after multi-file changes
+    def test_single_file_still_works(self):
+        result = extract_yaml_dispatch(STREETLIGHTS)
+        direct = extract_asyncapi(STREETLIGHTS)
+        # The dispatch result should contain at least everything from direct extraction
+        direct_labels = {n["label"] for n in direct["nodes"]}
+        dispatch_labels = {n["label"] for n in result["nodes"]}
+        assert direct_labels.issubset(dispatch_labels), (
+            f"Single-file AsyncAPI dispatch missing nodes: "
+            f"{direct_labels - dispatch_labels}"
+        )
+        # Channel nodes should still be present
+        channel_labels = {n["label"] for n in result["nodes"] if n["type"] == "channel"}
+        for ch in ("lightingMeasured", "lightTurnOn", "lightTurnOff", "lightsDim"):
+            assert ch in channel_labels, f"channel {ch!r} missing after multi-file changes"

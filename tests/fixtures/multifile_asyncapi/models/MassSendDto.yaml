@@ -1,0 +1,26 @@
+openapi: 3.0.1
+info:
+  title: mock
+  version: 1.0.0
+servers:
+  - url: "https://mock"
+paths:
+  /mock:
+    head:
+      summary: mock
+      operationId: mock
+      responses:
+        "200":
+          description: mock
+components:
+  schemas:
+    MassSendDto:
+      type: object
+      description: Данные массовой отправки
+      properties:
+        batchId:
+          type: string
+        items:
+          type: array
+          items:
+            type: string
