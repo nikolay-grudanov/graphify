@@ -2983,8 +2983,20 @@ def extract_asyncapi(path: Path) -> dict:
     return {"nodes": nodes, "edges": edges}
 
 
+def _unquote(s: str) -> str:
+    """Strip optional surrounding double-quotes from a DBML identifier."""
+    if s.startswith('"') and s.endswith('"'):
+        return s[1:-1]
+    return s
+
+
 def extract_dbml(path: Path) -> dict:
-    """Extract nodes and edges from a DBML file using regex."""
+    """Extract nodes and edges from a DBML file using regex.
+
+    Handles both unquoted (``Table users``) and quoted (``Table "users"``) DBML
+    identifiers, inline column refs (``ref: > other_table.col``), and standalone
+    Ref lines with optional names and quoted identifiers.
+    """
     text = path.read_text(encoding="utf-8", errors="replace")
     nodes: list[dict] = []
     edges: list[dict] = []
@@ -2997,23 +3009,71 @@ def extract_dbml(path: Path) -> dict:
             nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
         return nid
 
-    # Extract tables and their columns
-    for tm in re.finditer(r'Table\s+(\w+)(?:\s+as\s+\w+)?\s*\{([^}]*)\}', text, re.DOTALL):
-        table_name = tm.group(1)
+    # Identifier pattern: matches both  word  and  "quoted word"
+    _IDENT = r'"([^"]+)"|([\w]+)'
+
+    # ── Tables and columns ────────────────────────────────────────────────
+    # Match:  Table name {…}  or  Table "name" {…}  (optional  as alias )
+    _TABLE_RE = re.compile(
+        r'Table\s+(?:"([^"]+)"|(\w+))(?:\s+as\s+\w+)?\s*\{([^}]*)\}',
+        re.DOTALL,
+    )
+    # Column line: starts with whitespace, then quoted or bare name, then type
+    _COL_RE = re.compile(
+        r'^\s+(?:"([^"]+)"|(\w+))\s+\w+',
+        re.MULTILINE,
+    )
+    # Inline ref inside column attributes:  ref: > table.col  or  ref: > "table"."col"
+    _INLINE_REF_RE = re.compile(
+        r'ref:\s*[<>-]+\s*(?:"([^"]+)"|(\w+))\.(?:"([^"]+)"|(\w+))'
+    )
+
+    current_table: str | None = None
+    for tm in _TABLE_RE.finditer(text):
+        table_name = tm.group(1) or tm.group(2)
+        current_table = table_name
         table_nid = add_node(table_name, "table")
-        body = tm.group(2)
-        for col_match in re.finditer(r'^\s+(\w+)\s+\w+', body, re.MULTILINE):
-            col_name = col_match.group(1)
+        body = tm.group(3)
+        for col_match in _COL_RE.finditer(body):
+            col_name = col_match.group(1) or col_match.group(2)
+            # Skip DBML keywords that look like column starts
+            if col_name in ('Indexes', 'Note', 'Ref'):
+                continue
             col_nid = add_node(f"{table_name}.{col_name}", "column")
             edges.append({"source": table_nid, "target": col_nid, "type": "has_column", "label": col_name})
 
-    # Extract Ref: lines for foreign keys (handles optional ref names like "Ref name:")
-    for rm in re.finditer(r'Ref(?:\s+\w+)?\s*:\s*(\w+)\.(\w+)\s*[<>-]+\s*(\w+)\.(\w+)', text):
-        src_table = rm.group(1)
-        src_col = rm.group(2)
-        tgt_table = rm.group(3)
-        tgt_col = rm.group(4)
-        # Ensure both tables exist as nodes
+            # Check for inline ref in the same line
+            col_line_start = col_match.start()
+            col_line_end = body.find('\n', col_line_start)
+            if col_line_end == -1:
+                col_line_end = len(body)
+            col_line = body[col_line_start:col_line_end]
+            for ir in _INLINE_REF_RE.finditer(col_line):
+                ref_table = ir.group(1) or ir.group(2)
+                ref_col = ir.group(3) or ir.group(4)
+                ref_table_nid = add_node(ref_table, "table")
+                edges.append({
+                    "source": table_nid, "target": ref_table_nid,
+                    "type": "foreign_key",
+                    "label": f"{table_name}.{col_name} -> {ref_table}.{ref_col}",
+                })
+
+    # ── Standalone Ref lines ──────────────────────────────────────────────
+    # Handles all forms:
+    #   Ref: table.col > table.col
+    #   Ref name: table.col > table.col
+    #   Ref "name":"table"."col" < "table"."col"
+    _REF_RE = re.compile(
+        r'Ref(?:\s+(?:"[^"]+"|\w+))?\s*:\s*'
+        r'(?:"([^"]+)"|(\w+))\.(?:"([^"]+)"|(\w+))'
+        r'\s*[<>-]+\s*'
+        r'(?:"([^"]+)"|(\w+))\.(?:"([^"]+)"|(\w+))',
+    )
+    for rm in _REF_RE.finditer(text):
+        src_table = rm.group(1) or rm.group(2)
+        src_col = rm.group(3) or rm.group(4)
+        tgt_table = rm.group(5) or rm.group(6)
+        tgt_col = rm.group(7) or rm.group(8)
         src_nid = add_node(src_table, "table")
         tgt_nid = add_node(tgt_table, "table")
         edges.append({

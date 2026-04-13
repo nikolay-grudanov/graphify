@@ -18,6 +18,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 PETSTORE = FIXTURES / "petstore.yaml"
 STREETLIGHTS = FIXTURES / "streetlights.yaml"
 SOCIAL = FIXTURES / "social.dbml"
+KFUL_SCHEMA = FIXTURES / "kful_schema.dbml"
 ARCHITECTURE = FIXTURES / "architecture.puml"
 
 
@@ -134,6 +135,119 @@ class TestExtractDbml:
         follows_id = _make_id("dbml", "social", "follows")
         assert (posts_id, users_id) in pairs, f"posts->users FK not found; got {pairs}"
         assert (users_id, follows_id) in pairs, f"users->follows FK not found; got {pairs}"
+
+
+# ── extract_dbml enterprise tests (quoted identifiers, inline refs, named FKs) ──
+
+
+class TestExtractDbmlEnterprise:
+    """Test DBML parser against a real enterprise schema with quoted identifiers,
+    inline column refs, named foreign keys, and 30 tables."""
+
+    @pytest.fixture(autouse=True)
+    def _parse(self):
+        self.result = extract_dbml(KFUL_SCHEMA)
+        self.tables = {n["label"] for n in self.result["nodes"] if n["type"] == "table"}
+        self.columns = {n["label"] for n in self.result["nodes"] if n["type"] == "column"}
+        self.fk_edges = [e for e in self.result["edges"] if e["type"] == "foreign_key"]
+        self.col_edges = [e for e in self.result["edges"] if e["type"] == "has_column"]
+
+    def test_finds_all_30_tables(self):
+        expected_tables = {
+            "amounts_for_routing", "auto_routing_settings",
+            "autoclose_opportunity_settings", "branch_exception_for_routing",
+            "databasechangelog", "databasechangeloglock",
+            "document_groups", "document_types", "documents",
+            "idp_answers", "idp_arisk_condition_answer",
+            "idp_shareholder_risk_types",
+            "kful_category_types", "kful_deal_types",
+            "kful_opportunities", "kful_opportunity_categories",
+            "kful_opportunity_desks", "kful_opportunity_folders",
+            "kful_opportunity_processing_state_types",
+            "kful_opportunity_products", "kful_opportunity_team_members",
+            "kful_product_state_types", "kful_product_types",
+            "kful_sales_method_types", "kful_state_types",
+            "kful_team_role_types",
+            "outbox", "retirement_reason_types",
+            "routing_product_groups", "routing_product_types",
+        }
+        assert self.tables == expected_tables, (
+            f"Missing: {expected_tables - self.tables}, "
+            f"Extra: {self.tables - expected_tables}"
+        )
+
+    def test_quoted_table_names_parsed(self):
+        # All tables in kful_schema.dbml use quoted names like Table "name"
+        assert "kful_opportunities" in self.tables
+        assert "amounts_for_routing" in self.tables
+        assert "databasechangeloglock" in self.tables
+
+    def test_quoted_column_names_parsed(self):
+        # Columns use "quoted" names: "code" varchar(64)
+        for col in (
+            "amounts_for_routing.code",
+            "amounts_for_routing.desk_code",
+            "kful_opportunities.pprb_id",
+            "kful_opportunities.shareholder_risk_criteria_type_code",
+            "documents.document_type_code",
+        ):
+            assert col in self.columns, f"{col!r} not found"
+
+    def test_large_table_columns_count(self):
+        # kful_opportunities has 42 columns
+        opp_cols = [c for c in self.columns if c.startswith("kful_opportunities.")]
+        assert len(opp_cols) >= 40, f"Expected >=40 columns for kful_opportunities, got {len(opp_cols)}"
+
+    def test_databasechangelog_no_indexes_section(self):
+        # databasechangelog has no Indexes block — 14 columns, all should be found
+        cols = [c for c in self.columns if c.startswith("databasechangelog.") and not c.startswith("databasechangeloglock.")]
+        assert len(cols) >= 14, f"Expected >=14 columns for databasechangelog, got {len(cols)}"
+
+    def test_standalone_named_quoted_fk_refs(self):
+        # Ref "fk_document_types2document_groups":"document_groups"."code" < "document_types"."document_group_code"
+        fk_labels = {e["label"] for e in self.fk_edges}
+        expected_fks = [
+            "document_groups.code -> document_types.document_group_code",
+            "document_types.code -> documents.document_type_code",
+            "kful_opportunity_folders.object_id -> documents.kful_opportunities_folder_id",
+            "documents.object_id -> idp_answers.document_id",
+            "retirement_reason_types.code -> kful_state_types.retirement_reason_type_code",
+            "routing_product_groups.code -> routing_product_types.group_code",
+        ]
+        for fk in expected_fks:
+            assert fk in fk_labels, f"FK {fk!r} not found; got {sorted(fk_labels)}"
+
+    def test_kful_opportunities_standalone_fk_refs(self):
+        # Multiple FKs pointing to/from kful_opportunities
+        fk_labels = {e["label"] for e in self.fk_edges}
+        expected = [
+            "kful_state_types.code -> kful_opportunities.kful_state_type_code",
+            "kful_opportunity_processing_state_types.code -> kful_opportunities.processing_state_type_code",
+            "retirement_reason_types.code -> kful_opportunities.retirement_reason_type_code",
+            "kful_opportunities.object_id -> kful_opportunity_categories.kful_opportunity_id",
+            "kful_opportunities.object_id -> kful_opportunity_desks.kful_opportunity_id",
+            "kful_opportunities.object_id -> kful_opportunity_products.kful_opportunity_id",
+            "kful_opportunities.object_id -> kful_opportunity_team_members.kful_opportunity_id",
+        ]
+        for fk in expected:
+            assert fk in fk_labels, f"FK {fk!r} not found"
+
+    def test_inline_refs_extracted(self):
+        # kful_opportunities has inline refs:
+        #   ref: > idp_shareholder_risk_types.code
+        #   ref: > kful_deal_types.code
+        fk_labels = {e["label"] for e in self.fk_edges}
+        assert "kful_opportunities.ai_agent_shareholder_risk_code -> idp_shareholder_risk_types.code" in fk_labels
+        assert "kful_opportunities.kful_deal_type_code -> kful_deal_types.code" in fk_labels
+
+    def test_total_fk_count(self):
+        # 17 standalone Ref lines + 2 inline refs = 19 total
+        assert len(self.fk_edges) == 19, f"Expected 19 FK edges, got {len(self.fk_edges)}"
+
+    def test_has_column_edges_match_columns(self):
+        assert len(self.col_edges) == len(self.columns), (
+            f"has_column edges ({len(self.col_edges)}) != columns ({len(self.columns)})"
+        )
 
 
 # ── extract_plantuml tests ───────────────────────────────────────────────────
