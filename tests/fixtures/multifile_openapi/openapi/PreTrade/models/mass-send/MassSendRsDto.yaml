@@ -1,0 +1,37 @@
+openapi: 3.0.1
+info:
+  title: mock
+  version: 1.0.0
+servers:
+  - url: 'https://mock'
+paths:
+  /mock:
+    head:
+      x-allow-sigma: false
+      operationId: mock
+      summary: mock
+      responses:
+        '200':
+          description: mock
+# <---
+components:
+  schemas:
+    MassSendRsDto:
+      additionalProperties: false
+      type: object
+      description: Ответ на запрос массовой выгрузки
+      properties:
+        status:
+          type: string
+          description: Статус обработки
+          enum:
+            - ACCEPTED
+            - REJECTED
+            - IN_PROGRESS
+        requestId:
+          type: string
+          format: uuid
+          description: Идентификатор запроса
+        processedCount:
+          type: integer
+          description: Количество обработанных записей

@@ -1,0 +1,161 @@
+@startuml
+title Поиск контрагента для корпоративных запросов \n /corporate-requests/info/search
+!pragma useVerticalIf on
+
+
+start
+:Получение запроса на поиск данных;
+
+
+if (В запросе есть условия для поиска (ОГРН, ИНН, наименование, email)?) then (нет)
+   #pink:Ошибка: недостаточно данных;
+   note right: Отсутствуют все атрибуты
+   stop
+else (да)
+
+
+   ' ----- Блок поиска по email -----
+   if (В запросе есть email?) then (да)
+        :Поиск СФЛ по Email;
+        note left
+           В таблице contacts_info ищем
+           contacts_info.type = email &&
+           contacts_info.contact_value = emailFrom
+        end note
+        if (СФЛ найден?) then (да)
+          :Поиск связи СФЛ с контрагентом;
+          note left
+              1. Связь через таблицу relations, где
+              relations.rnp_party_id = contacts_info.rnp_party_id
+              Нашли org_party_id
+              2. В таблице business_parties - находим Все object_id контрагента
+              business_parties.party_id = clients_info.org_party_id
+              ====
+              Определили Список object_id контрагента
+
+
+          end note
+          if (Связь найдена?) then (да)
+            #blue:Переход к поиску сделки;
+            note left
+                Определили Список object_id контрагента
+                ====
+                [[./search-deal-info-for-corporate-requests.puml Алгоритм поиска сделки]]
+            end note
+            kill
+          else (нет)
+            ' СФЛ найден, но связи нет → переходим к следующим атрибутам
+          endif
+        else (нет)
+            :Обрезать почту до домена;
+            :Поиск СФЛ по домену;
+            note left
+                В таблице contacts_info ищем
+                contacts_info.type = email &&
+                contacts_info.contact_value оканчивается на @домен
+            end note
+            if (СФЛ найден?) then (да)
+                :Если СФЛ несколько - берем первый;
+                :Поиск связи СФЛ с контрагентом;
+                note left
+                    Аналогично поиску связи после точного email
+                end note
+                if (Связь найдена?) then (да)
+                    #blue:Переход к поиску сделки;
+                    note left
+                        Список object_id контрагентов
+                        ====
+                        [[./search-deal-info-for-corporate-requests.puml Алгоритм поиска сделки]]
+                    end note
+                    kill
+                else (нет)
+                    ' СФЛ по домену найден, но связи нет → переходим дальше
+                endif
+            else (нет)
+                ' По домену тоже ничего не найдено
+            endif
+        endif
+   endif
+   ' -------------------------------------------------
+
+
+   if (В запросе есть ОГРН?) then (да)
+     :Поиск контрагента по ОГРН;
+     note left
+        В таблице clients_info ищем
+        clients_info.ogrn = orgn
+     end note
+     if (Контрагент найден?) then (да)
+       #blue:Переход к поиску сделки;
+       note left
+        Определили partyExternalId
+        ====
+        [[./search-deal-info-for-corporate-requests.puml Алгоритм поиска сделки]]
+       end note
+       kill
+     else (нет)
+       ' ничего не делаем, переходим к следующему атрибуту
+     endif
+   endif
+
+
+   if (В запросе есть ИНН?) then (да)
+     :Поиск контрагента по ИНН;
+     note left
+         В таблице clients_info ищем
+         clients_info.inn = inn
+     end note
+     if (Контрагент найден?) then (да)
+       #blue:Переход к поиску сделки;
+       note left
+               Определили partyExternalId
+               ====
+               [[./search-deal-info-for-corporate-requests.puml Алгоритм поиска сделки]]
+       end note
+       kill
+     else (нет)
+       ' ничего не делаем, переходим к следующему атрибуту
+     endif
+   endif
+
+
+   if (В запросе есть наименование компании?) then (да)
+     :Поиск контрагента по наименованию;
+      note left
+        В таблице сlients_info ищем
+        clients_info.full_name LIKE fullName ||
+        clients_info.short_name LIKE fullName
+      end note
+      if (Найдены контрагенты?) then (да)
+          if (Количество найденных равно 1?) then (да)
+              #blue:Переход к поиску сделки;
+              note left
+                  Определили partyExternalId
+                  ====
+                  [[./search-deal-info-for-corporate-requests.puml Алгоритм поиска сделки]]
+              end note
+              kill
+          else (нет, найдено несколько)
+              :Выбираем наибольшее совпадение;
+              #blue:Переход к поиску сделки;
+              note left
+                  Определили partyExternalId
+                  ====
+                  [[./search-deal-info-for-corporate-requests.puml Алгоритм поиска сделки]]
+              end note
+              kill
+          endif
+      else (нет)
+          ' ничего не найдено — просто выходим из блока
+      endif
+   endif
+
+
+   ' Если дошли до этой точки, значит ни один атрибут не дал результата
+   #pink:Ошибка: контрагент не найден;
+   note left: Не удалось найти контрагента
+   stop
+endif
+
+
+@enduml

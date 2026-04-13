@@ -1,0 +1,60 @@
+@startuml POST /corporate-request/mass-send
+!include ../../../../../commons/skinparams.puml
+!include ../../../../../commons/legend.puml
+
+
+title Массовая отправка уведомлений по корпоративным запросам \n [[../../../../../../../openapi/PostTrade/corporaterequests-be/corporate-requests.yaml POST /corporate-request/mass-send]]
+autonumber
+
+
+participant "SOMETHING" as SOMETHING
+participant "CORPORATE-REQUESTS-BE" as CR_BE
+box "\n<$kafka>\nkafka ДИД" #White
+    queue "NOTIFICATIONS.NOTIFICATION_COMMANDS" as Q_NC order 200
+end box
+
+
+
+== Валидация и аутентификация ==
+SOMETHING -> CR_BE: POST /corporate-request/mass-send
+activate CR_BE
+
+
+== Преобразование UUID в Set<String> ==
+CR_BE -> CR_BE: Преобразование списка UUID в множество строк
+
+
+== Асинхронная отправка уведомлений ==
+loop Для каждого UUID
+    CR_BE -> NCE: Отправка уведомлений асинхронно
+    note right
+        Публикация событий для каждого корпоративного запроса
+    end note
+end
+
+
+== Возврат результата ==
+CR_BE -> SOMETHING: HTTP 202 Accepted
+note right
+    Запрос принят в обработку
+end note
+deactivate CR_BE
+
+
+== Обработка ошибок ==
+alt Недостаточно прав доступа (403)
+    CR_BE -> SOMETHING: HTTP 403 Forbidden, "Отказано в доступе"
+end
+
+
+alt Неверный формат UUID в списке (400)
+    CR_BE -> SOMETHING: HTTP 400 Bad Request, "Неверный формат UUID"
+end
+
+
+alt Пустой список ID (400)
+    CR_BE -> SOMETHING: HTTP 400 Bad Request, "Список ID не может быть пустым"
+end
+
+
+@enduml

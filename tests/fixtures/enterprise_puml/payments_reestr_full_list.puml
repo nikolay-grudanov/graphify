@@ -1,0 +1,55 @@
+@startuml Страница всех платежей IB
+
+
+title Страница всех платежей IB
+!include ../../commons/skinparams.puml
+!include ../../commons/legend.puml
+
+
+'Описание участников процесса
+actor Пользователь as user
+participant  "PAYMENT-ORDERS APP" as IB_P_FE order 20
+participant  "IB_PAYMENTS BE" as IB_P_BE order 110
+participant  "IB-VIEW BE" as IBV_BE order 100
+participant  "SETTINGS BE" as ST_BE order 140
+
+
+'Описание процесса
+user ->  IB_P_FE: Список платежей IB
+IB_P_FE <-> ST_BE: Запрос настроек таблицы для текущего пользователя
+note right
+    GET /settings-be/table-settings/PaymentsRegister
+end note
+IB_P_FE <-> IB_P_BE: Запрос справочника статусов платежей
+note right
+    GET /dictionaries/payment-status-types
+end note
+IB_P_FE <-> IB_P_BE: Запрос справочника направлений платежа
+note right
+    GET /dictionaries/payment-direction-types
+end note
+IB_P_FE -> IBV_BE: Запрос реестра платежей
+note right
+    POST /ib-view-be/payments/search
+end note
+IBV_BE -> IBV_BE: Построение выборки в соответствии с фильтрацией, пагинацией
+IBV_BE --> IB_P_FE: Ответ на запрос реестра платежей
+note left $Frontend
+    Если клиент ФЛ (clientType.code == 'INDIVIDUAL') - выводим предупреждение:
+    Клиент - ФЛ
+end note
+IB_P_FE -> IBV_BE: Запрос суммарных значений по платежам
+note right
+    POST /ib-view-be/payments/totals
+end note
+IBV_BE -> IBV_BE: Выполнение расчета суммарных значений
+IBV_BE --> IB_P_FE: Суммарные значения по платежам
+IB_P_FE -> IB_P_FE: Построение таблицы платежей
+IB_P_FE --> user: Список платежей IB
+
+
+==[[./payment_read_preview.puml Просмотр данных о платеже (Preview)]]==
+
+
+
+@enduml

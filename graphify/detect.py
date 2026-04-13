@@ -18,7 +18,7 @@ class FileType(str, Enum):
 
 _MANIFEST_PATH = "graphify-out/manifest.json"
 
-CODE_EXTENSIONS = {'.py', '.ts', '.js', '.jsx', '.tsx', '.go', '.rs', '.java', '.cpp', '.cc', '.cxx', '.c', '.h', '.hpp', '.rb', '.swift', '.kt', '.kts', '.cs', '.scala', '.php', '.lua', '.toc', '.zig', '.ps1', '.ex', '.exs', '.m', '.mm', '.jl', '.vue', '.svelte', '.dart'}
+CODE_EXTENSIONS = {'.py', '.ts', '.js', '.jsx', '.tsx', '.go', '.rs', '.java', '.cpp', '.cc', '.cxx', '.c', '.h', '.hpp', '.rb', '.swift', '.kt', '.kts', '.cs', '.scala', '.php', '.lua', '.toc', '.zig', '.ps1', '.ex', '.exs', '.m', '.mm', '.jl', '.vue', '.svelte', '.dart', '.yaml', '.yml', '.dbml', '.puml', '.plantuml', '.pu'}
 DOC_EXTENSIONS = {'.md', '.txt', '.rst'}
 PAPER_EXTENSIONS = {'.pdf'}
 IMAGE_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'}
@@ -79,11 +79,28 @@ def _looks_like_paper(path: Path) -> bool:
 _ASSET_DIR_MARKERS = {".imageset", ".xcassets", ".appiconset", ".colorset", ".launchimage"}
 
 
+def classify_yaml(path: Path) -> FileType | None:
+    """Classify YAML by content — only OpenAPI/AsyncAPI count as CODE."""
+    try:
+        head = "\n".join(path.read_text(encoding="utf-8", errors="ignore").splitlines()[:20])
+    except Exception:
+        return None
+    if re.search(r'openapi\s*:\s*["\']?3\.', head):
+        return FileType.CODE
+    if re.search(r'asyncapi\s*:\s*["\']?', head):
+        return FileType.CODE
+    return FileType.DOCUMENT
+
+
 def classify_file(path: Path) -> FileType | None:
     # Compound extensions must be checked before simple suffix lookup
     if path.name.lower().endswith(".blade.php"):
         return FileType.CODE
     ext = path.suffix.lower()
+    if ext in ('.yaml', '.yml'):
+        return classify_yaml(path)
+    if ext in ('.dbml', '.puml', '.plantuml', '.pu'):
+        return FileType.CODE
     if ext in CODE_EXTENSIONS:
         return FileType.CODE
     if ext in PAPER_EXTENSIONS:

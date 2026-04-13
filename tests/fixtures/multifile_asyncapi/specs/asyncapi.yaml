@@ -1,0 +1,28 @@
+asyncapi: 3.0.0
+info:
+  title: KfulSources-be
+  version: 1.0.0
+  description: >
+    Микросервис, отвечающий за хранение, поиск сделок во внешних системах.
+
+channels:
+  KFULSOURCES.KFUL.KFUL_OPPORTUNITY_STATE:
+    $ref: ../kafka/kfulsources-be/KFULSOURCES.KFUL.KFUL_OPPORTUNITY_STATE/channel.yaml
+
+  KFULSOURCES.KFUL.MASS_SEND:
+    $ref: ../kafka/kfulsources-be/KFULSOURCES.KFUL.MASS_SEND/channel.yaml
+
+operations:
+  SendKfulOpportunityState:
+    action: send
+    channel:
+      $ref: "#/channels/KFULSOURCES.KFUL.KFUL_OPPORTUNITY_STATE"
+    messages:
+      - $ref: "#/channels/KFULSOURCES.KFUL.KFUL_OPPORTUNITY_STATE/messages/KfulOpportunityState"
+
+  MassSendKful:
+    action: send
+    channel:
+      $ref: "#/channels/KFULSOURCES.KFUL.MASS_SEND"
+    messages:
+      - $ref: "#/channels/KFULSOURCES.KFUL.MASS_SEND/messages/KfulMassSend"

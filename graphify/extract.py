@@ -14,7 +14,7 @@ from .cache import load_cached, save_cached
 def _make_id(*parts: str) -> str:
     """Build a stable node ID from one or more name parts."""
     combined = "_".join(p.strip("_.") for p in parts if p)
-    cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", combined)
+    cleaned = re.sub(r"[^\w]+", "_", combined)
     return cleaned.strip("_").lower()
 
 
@@ -2867,6 +2867,481 @@ def extract_elixir(path: Path) -> dict:
     return {"nodes": nodes, "edges": clean_edges, "input_tokens": 0, "output_tokens": 0}
 
 
+# ── Custom artifact parsers (OpenAPI, AsyncAPI, DBML, PlantUML) ─────────────
+
+
+def extract_openapi(path: Path) -> dict:
+    """Extract nodes and edges from an OpenAPI 3.x YAML file using regex."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    nodes: list[dict] = []
+    edges: list[dict] = []
+    seen_ids: set[str] = set()
+
+    def add_node(name: str, ntype: str) -> str:
+        nid = _make_id("openapi", path.stem, ntype, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+        return nid
+
+    # Extract path entries (endpoints)
+    for m in re.finditer(r'^  (/[^\s:]+)\s*:', text, re.MULTILINE):
+        add_node(m.group(1), "endpoint")
+
+    # Extract operationId values
+    for m in re.finditer(r'operationId\s*:\s*["\']?(\w+)', text):
+        add_node(m.group(1), "operation")
+
+    # Extract schema names under components/schemas
+    schema_section = re.search(r'^components\s*:.*?^  schemas\s*:', text, re.MULTILINE | re.DOTALL)
+    if schema_section:
+        rest = text[schema_section.end():]
+        for line in rest.splitlines():
+            # Stop at next sibling section (2-space indent) or top-level key (no indent)
+            if line and not line.startswith('    ') and not line.startswith('  ') and not line[0].isspace():
+                break
+            if line.startswith('  ') and not line.startswith('    ') and line.strip() and not line.strip().startswith('#'):
+                break
+            # Schema names are at exactly 4-space indent
+            m = re.match(r'^    ([A-Z]\w*)\s*:', line)
+            if m:
+                add_node(m.group(1), "schema")
+
+    # Extract $ref edges
+    for m in re.finditer(r'\$ref\s*:\s*["\']?#/components/schemas/(\w+)', text):
+        ref_name = m.group(1)
+        ref_nid = add_node(ref_name, "schema")
+        # Find nearest parent context (endpoint or operation)
+        preceding = text[:m.start()]
+        parent_match = None
+        for pm in re.finditer(r'^  (/[^\s:]+)\s*:', preceding, re.MULTILINE):
+            parent_match = pm
+        if parent_match:
+            parent_nid = _make_id("openapi", path.stem, "endpoint", parent_match.group(1))
+            if parent_nid in seen_ids:
+                edges.append({"source": parent_nid, "target": ref_nid, "type": "references", "label": "$ref"})
+
+    return {"nodes": nodes, "edges": edges}
+
+
+def extract_asyncapi(path: Path) -> dict:
+    """Extract nodes and edges from an AsyncAPI YAML file using regex."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    nodes: list[dict] = []
+    edges: list[dict] = []
+    seen_ids: set[str] = set()
+
+    def add_node(name: str, ntype: str) -> str:
+        nid = _make_id("asyncapi", path.stem, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+        return nid
+
+    # Extract channel entries
+    in_channels = False
+    current_channel = None
+    for line in text.splitlines():
+        stripped = line.strip()
+        # Detect channels: section
+        if re.match(r'^channels\s*:', line):
+            in_channels = True
+            continue
+        # Detect end of channels section (new top-level key)
+        if in_channels and re.match(r'^\S', line) and not re.match(r'^channels\s*:', line):
+            in_channels = False
+            current_channel = None
+            continue
+        if in_channels:
+            # Channel name (2-space indented)
+            ch_match = re.match(r'^  (\S[^\s:]*)\s*:', line)
+            if ch_match:
+                current_channel = ch_match.group(1)
+                add_node(current_channel, "channel")
+            # Operations: publish, subscribe, send, receive
+            op_match = re.match(r'^\s+(publish|subscribe|send|receive)\s*:', line)
+            if op_match and current_channel:
+                op_name = f"{current_channel}.{op_match.group(1)}"
+                op_nid = add_node(op_name, "operation")
+                ch_nid = _make_id("asyncapi", path.stem, current_channel)
+                edges.append({"source": ch_nid, "target": op_nid, "type": "has_operation", "label": op_match.group(1)})
+
+    # Extract $ref and message references
+    for m in re.finditer(r'\$ref\s*:\s*["\']?#/components/(?:messages|schemas)/(\w+)', text):
+        ref_name = m.group(1)
+        ref_nid = add_node(ref_name, "message")
+        # Link to nearest channel
+        preceding = text[:m.start()]
+        parent = None
+        for pm in re.finditer(r'^  (\S[^\s:]*)\s*:', preceding, re.MULTILINE):
+            parent = pm
+        if parent:
+            parent_nid = _make_id("asyncapi", path.stem, parent.group(1))
+            if parent_nid in seen_ids:
+                edges.append({"source": parent_nid, "target": ref_nid, "type": "references", "label": "$ref"})
+
+    return {"nodes": nodes, "edges": edges}
+
+
+def _unquote(s: str) -> str:
+    """Strip optional surrounding double-quotes from a DBML identifier."""
+    if s.startswith('"') and s.endswith('"'):
+        return s[1:-1]
+    return s
+
+
+def extract_dbml(path: Path) -> dict:
+    """Extract nodes and edges from a DBML file using regex.
+
+    Handles both unquoted (``Table users``) and quoted (``Table "users"``) DBML
+    identifiers, inline column refs (``ref: > other_table.col``), and standalone
+    Ref lines with optional names and quoted identifiers.
+    """
+    text = path.read_text(encoding="utf-8", errors="replace")
+    nodes: list[dict] = []
+    edges: list[dict] = []
+    seen_ids: set[str] = set()
+
+    def add_node(name: str, ntype: str) -> str:
+        nid = _make_id("dbml", path.stem, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+        return nid
+
+    # Identifier pattern: matches both  word  and  "quoted word"
+    _IDENT = r'"([^"]+)"|([\w]+)'
+
+    # ── Tables and columns ────────────────────────────────────────────────
+    # Match:  Table name {…}  or  Table "name" {…}  (optional  as alias )
+    _TABLE_RE = re.compile(
+        r'Table\s+(?:"([^"]+)"|(\w+))(?:\s+as\s+\w+)?\s*\{([^}]*)\}',
+        re.DOTALL,
+    )
+    # Column line: starts with whitespace, then quoted or bare name, then type
+    _COL_RE = re.compile(
+        r'^\s+(?:"([^"]+)"|(\w+))\s+\w+',
+        re.MULTILINE,
+    )
+    # Inline ref inside column attributes:  ref: > table.col  or  ref: > "table"."col"
+    _INLINE_REF_RE = re.compile(
+        r'ref:\s*[<>-]+\s*(?:"([^"]+)"|(\w+))\.(?:"([^"]+)"|(\w+))'
+    )
+
+    current_table: str | None = None
+    for tm in _TABLE_RE.finditer(text):
+        table_name = tm.group(1) or tm.group(2)
+        current_table = table_name
+        table_nid = add_node(table_name, "table")
+        body = tm.group(3)
+        for col_match in _COL_RE.finditer(body):
+            col_name = col_match.group(1) or col_match.group(2)
+            # Skip DBML keywords that look like column starts
+            if col_name in ('Indexes', 'Note', 'Ref'):
+                continue
+            col_nid = add_node(f"{table_name}.{col_name}", "column")
+            edges.append({"source": table_nid, "target": col_nid, "type": "has_column", "label": col_name})
+
+            # Check for inline ref in the same line
+            col_line_start = col_match.start()
+            col_line_end = body.find('\n', col_line_start)
+            if col_line_end == -1:
+                col_line_end = len(body)
+            col_line = body[col_line_start:col_line_end]
+            for ir in _INLINE_REF_RE.finditer(col_line):
+                ref_table = ir.group(1) or ir.group(2)
+                ref_col = ir.group(3) or ir.group(4)
+                ref_table_nid = add_node(ref_table, "table")
+                edges.append({
+                    "source": table_nid, "target": ref_table_nid,
+                    "type": "foreign_key",
+                    "label": f"{table_name}.{col_name} -> {ref_table}.{ref_col}",
+                })
+
+    # ── Standalone Ref lines ──────────────────────────────────────────────
+    # Handles all forms:
+    #   Ref: table.col > table.col
+    #   Ref name: table.col > table.col
+    #   Ref "name":"table"."col" < "table"."col"
+    _REF_RE = re.compile(
+        r'Ref(?:\s+(?:"[^"]+"|\w+))?\s*:\s*'
+        r'(?:"([^"]+)"|(\w+))\.(?:"([^"]+)"|(\w+))'
+        r'\s*[<>-]+\s*'
+        r'(?:"([^"]+)"|(\w+))\.(?:"([^"]+)"|(\w+))',
+    )
+    for rm in _REF_RE.finditer(text):
+        src_table = rm.group(1) or rm.group(2)
+        src_col = rm.group(3) or rm.group(4)
+        tgt_table = rm.group(5) or rm.group(6)
+        tgt_col = rm.group(7) or rm.group(8)
+        src_nid = add_node(src_table, "table")
+        tgt_nid = add_node(tgt_table, "table")
+        edges.append({
+            "source": src_nid, "target": tgt_nid,
+            "type": "foreign_key",
+            "label": f"{src_table}.{src_col} -> {tgt_table}.{tgt_col}",
+        })
+
+    return {"nodes": nodes, "edges": edges}
+
+
+def extract_plantuml(path: Path) -> dict:
+    """Extract nodes and edges from a PlantUML file using regex."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    nodes: list[dict] = []
+    edges: list[dict] = []
+    seen_ids: set[str] = set()
+
+    def add_node(name: str, ntype: str) -> str:
+        nid = _make_id("puml", path.stem, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+        return nid
+
+    # Extract class, interface, component, actor declarations
+    for m in re.finditer(r'\b(class|interface|component|actor)\s+["\']?(\w+)', text):
+        add_node(m.group(2), m.group(1))
+
+    # Extract participant/queue declarations: participant "Label" as Alias, or participant Alias
+    # Also handles 'queue' keyword which is semantically equivalent to participant
+    for m in re.finditer(
+        r'\b(?:participant|queue)\s+'
+        r'(?:"[^"]*"|\'[^\']*\')\s+as\s+(\w+)'  # quoted name with alias
+        r'|\b(?:participant|queue)\s+(\w+)',      # bare name
+        text,
+    ):
+        name = m.group(1) or m.group(2)
+        if name:
+            add_node(name, "participant")
+
+    # Relationship type mapping
+    rel_map = {
+        "-->": "association",
+        "--|>": "inheritance",
+        "..>": "dependency",
+        "--*": "composition",
+        "--o": "aggregation",
+        "->": "message",
+        "<->": "bidirectional",
+        "<--": "return",
+    }
+
+    # Extract relationships: A --> B, A --|> B, A ..> B, A --* B, A --o B,
+    # and sequence diagram arrows: A -> B, A <-> B, A <-- B
+    for m in re.finditer(r'(\w+)\s+(--\|>|<->|-->|<--|->|\.\.>|--\*|--o)\s+(\w+)', text):
+        src_name = m.group(1)
+        rel_symbol = m.group(2)
+        tgt_name = m.group(3)
+        src_nid = add_node(src_name, "class")
+        tgt_nid = add_node(tgt_name, "class")
+        rel_type = rel_map.get(rel_symbol, "association")
+        edges.append({"source": src_nid, "target": tgt_nid, "type": rel_type, "label": rel_symbol})
+
+    # ── Activity diagram support ─────────────────────────────────────────────
+    # Strip single-line notes first ("note left: ..." or "note right: ...")
+    # so they don't get caught by the multiline note regex.
+    stripped = re.sub(r'^\s*note\s+(?:left|right)\s*:.*$', '', text, flags=re.MULTILINE)
+    # Strip multiline notes (note left/right ... end note) so their content
+    # doesn't produce false action/decision matches.
+    stripped = re.sub(
+        r'^\s*note\s+(?:left|right)\s*\n.*?^\s*end\s+note',
+        '', stripped, flags=re.MULTILINE | re.DOTALL,
+    )
+
+    # Activity action nodes: :Action text; or #color:Action text;
+    for m in re.finditer(r'^\s*(?:#\w+)?:(.*?);', stripped, flags=re.MULTILINE):
+        label = m.group(1).strip()
+        if label:
+            add_node(label, "action")
+
+    # Activity decision nodes: if (condition?) then
+    for m in re.finditer(r'^\s*if\s*\((.+?)\)\s*then\b', stripped, flags=re.MULTILINE):
+        label = m.group(1).strip()
+        if label:
+            add_node(label, "decision")
+
+    return {"nodes": nodes, "edges": edges}
+
+
+# ── Cross-file $ref resolution ───────────────────────────────────────────────
+
+
+def _resolve_external_refs(
+    path: Path,
+    nodes: list[dict],
+    edges: list[dict],
+    seen_ids: set[str],
+    prefix: str,
+    *,
+    _visited: set[str] | None = None,
+) -> None:
+    """Scan a YAML file for external $ref links, create edges and recurse.
+
+    External refs look like:
+        $ref: ../path/to/file.yaml#/components/schemas/Name
+        $ref: ./models/Dto.yaml#/components/schemas/Dto
+
+    For each external ref we:
+    1. Create a node for the referenced entity (schema/message).
+    2. Create an ``external_ref`` edge from the nearest context node to the target.
+    3. Recursively parse the referenced file (guarded by *_visited* to prevent cycles).
+    """
+    if _visited is None:
+        _visited = set()
+    resolved = str(path.resolve())
+    if resolved in _visited:
+        return
+    _visited.add(resolved)
+
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return
+
+    def _add_node(name: str, ntype: str, source_file: Path) -> str:
+        nid = _make_id(prefix, source_file.stem, ntype, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(source_file)})
+        return nid
+
+    # Find all external $ref (contain a file path, not starting with #)
+    for m in re.finditer(
+        r'\$ref\s*:\s*["\']?'
+        r'([^#"\'>\s]+)'           # file path part
+        r'#/components/(?:schemas|messages)/'
+        r'(\w+)',                   # entity name
+        text,
+    ):
+        rel_path = m.group(1).strip()
+        entity_name = m.group(2)
+
+        # Resolve relative to the current file's directory
+        target_file = (path.parent / rel_path).resolve()
+        if not target_file.exists():
+            continue
+
+        # Create node for the referenced entity
+        ref_nid = _add_node(entity_name, "schema", target_file)
+
+        # Find nearest context node to use as edge source
+        preceding = text[:m.start()]
+        # Try channel-style context (2-space indent key)
+        parent_match = None
+        for pm in re.finditer(r'^  (\S[^\s:]*)\s*:', preceding, re.MULTILINE):
+            parent_match = pm
+        # Try top-level key for channel.yaml files (address:, messages:)
+        if parent_match is None:
+            for pm in re.finditer(r'^(\w[^\s:]*)\s*:', preceding, re.MULTILINE):
+                parent_match = pm
+        if parent_match:
+            parent_name = parent_match.group(1)
+            parent_nid = _make_id(prefix, path.stem, "channel", parent_name)
+            if parent_nid not in seen_ids:
+                parent_nid = _make_id(prefix, path.stem, "endpoint", parent_name)
+            if parent_nid not in seen_ids:
+                # Fallback: create a generic context node
+                parent_nid = _add_node(parent_name, "context", path)
+            edges.append({
+                "source": parent_nid, "target": ref_nid,
+                "type": "external_ref", "label": f"$ref -> {entity_name}",
+            })
+
+        # Recursively parse the target file
+        _resolve_external_refs(
+            target_file, nodes, edges, seen_ids, prefix, _visited=_visited,
+        )
+
+    # Also handle channel $ref (AsyncAPI channels referencing external channel.yaml)
+    for m in re.finditer(
+        r'\$ref\s*:\s*["\']?([^#"\'>\s]+\.yaml)\s*["\']?',
+        text,
+    ):
+        rel_path = m.group(1).strip()
+        if rel_path.startswith('#'):
+            continue
+        target_file = (path.parent / rel_path).resolve()
+        if not target_file.exists():
+            continue
+
+        # Parse the channel file for its own nodes
+        _parse_channel_file(target_file, nodes, edges, seen_ids, prefix)
+
+        # And recurse into it for its external refs
+        _resolve_external_refs(
+            target_file, nodes, edges, seen_ids, prefix, _visited=_visited,
+        )
+
+
+def _parse_channel_file(
+    path: Path,
+    nodes: list[dict],
+    edges: list[dict],
+    seen_ids: set[str],
+    prefix: str,
+) -> None:
+    """Parse a standalone AsyncAPI channel.yaml file (no asyncapi: header).
+
+    These files typically have: address, description, messages, parameters.
+    """
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return
+
+    def _add_node(name: str, ntype: str) -> str:
+        nid = _make_id(prefix, path.stem, ntype, name)
+        if nid not in seen_ids:
+            seen_ids.add(nid)
+            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+        return nid
+
+    # Extract address as channel name
+    addr_m = re.search(r'^address\s*:\s*(.+)', text, re.MULTILINE)
+    if addr_m:
+        channel_name = addr_m.group(1).strip()
+        _add_node(channel_name, "channel")
+
+    # Extract message names
+    for mm in re.finditer(r'^  (\w+)\s*:', text, re.MULTILINE):
+        # Only under messages: section
+        preceding = text[:mm.start()]
+        if 'messages:' in preceding.split('\n')[-5:].__repr__():
+            msg_name = mm.group(1)
+            if msg_name not in ('name', 'title', 'contentType', 'headers', 'payload', 'description', 'summary', 'traits'):
+                _add_node(msg_name, "message")
+
+
+def extract_yaml_dispatch(path: Path) -> dict:
+    """Route YAML files to OpenAPI or AsyncAPI extractor based on content.
+
+    After the primary extraction, resolves external $ref links to build
+    cross-file edges and recursively extract nodes from referenced files.
+    """
+    try:
+        head = path.read_text(encoding="utf-8", errors="replace")[:500]
+    except Exception:
+        return {"nodes": [], "edges": []}
+    if re.search(r'openapi\s*:\s*["\']?3\.', head):
+        result = extract_openapi(path)
+        # Resolve cross-file refs for OpenAPI too
+        _resolve_external_refs(
+            path, result["nodes"], result["edges"],
+            {n["id"] for n in result["nodes"]}, "openapi",
+        )
+        return result
+    if re.search(r'asyncapi\s*:\s*["\']?', head):
+        result = extract_asyncapi(path)
+        # Resolve cross-file refs
+        _resolve_external_refs(
+            path, result["nodes"], result["edges"],
+            {n["id"] for n in result["nodes"]}, "asyncapi",
+        )
+        return result
+    return {"nodes": [], "edges": []}
+
+
 # ── Main extract and collect_files ────────────────────────────────────────────
 
 
@@ -2948,6 +3423,12 @@ def extract(paths: list[Path]) -> dict:
         ".vue": extract_js,
         ".svelte": extract_js,
         ".dart": extract_dart,
+        ".yaml":     extract_yaml_dispatch,
+        ".yml":      extract_yaml_dispatch,
+        ".dbml":     extract_dbml,
+        ".puml":     extract_plantuml,
+        ".plantuml": extract_plantuml,
+        ".pu":       extract_plantuml,
     }
 
     total = len(paths)
@@ -3007,6 +3488,7 @@ def collect_files(target: Path, *, follow_symlinks: bool = False, root: Path | N
         ".rb", ".cs", ".kt", ".kts", ".scala", ".php", ".swift",
         ".lua", ".toc", ".zig", ".ps1",
         ".m", ".mm",
+        ".yaml", ".yml", ".dbml", ".puml", ".plantuml", ".pu",
     }
     from graphify.detect import _load_graphifyignore, _is_ignored
     ignore_root = root if root is not None else target

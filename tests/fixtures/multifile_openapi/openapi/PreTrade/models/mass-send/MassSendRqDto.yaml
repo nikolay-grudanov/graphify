@@ -1,0 +1,32 @@
+openapi: 3.0.1
+info:
+  title: mock
+  version: 1.0.0
+servers:
+  - url: 'https://mock'
+paths:
+  /mock:
+    head:
+      x-allow-sigma: false
+      operationId: mock
+      summary: mock
+      responses:
+        '200':
+          description: mock
+# <---
+components:
+  schemas:
+    MassSendRqDto:
+      additionalProperties: false
+      type: object
+      description: Запрос на инициацию массовой выгрузки сделок КФЮЛ
+      properties:
+        startDateTime:
+          $ref: ../../../models/LocalDateTime.yaml#/components/schemas/LocalDateTime
+        objectIds:
+          $ref: ../../../models/ObjectIds.yaml#/components/schemas/ObjectIds
+        updateToNowDifference:
+          description: На сколько дней назад делать обновление
+          type: integer
+          minimum: 0
+          maximum: 2147483647

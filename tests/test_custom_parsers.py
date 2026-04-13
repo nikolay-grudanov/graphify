@@ -1,0 +1,914 @@
+"""Tests for custom artifact parsers (OpenAPI, AsyncAPI, DBML, PlantUML)."""
+from pathlib import Path
+import tempfile
+
+import pytest
+
+from graphify.extract import (
+    extract_openapi,
+    extract_asyncapi,
+    extract_dbml,
+    extract_plantuml,
+    extract_yaml_dispatch,
+    _resolve_external_refs,
+    _parse_channel_file,
+    _make_id,
+)
+from graphify.detect import classify_file, classify_yaml, FileType
+
+
+FIXTURES = Path(__file__).parent / "fixtures"
+PETSTORE = FIXTURES / "petstore.yaml"
+STREETLIGHTS = FIXTURES / "streetlights.yaml"
+SOCIAL = FIXTURES / "social.dbml"
+KFUL_SCHEMA = FIXTURES / "kful_schema.dbml"
+ARCHITECTURE = FIXTURES / "architecture.puml"
+MULTIFILE_ASYNCAPI = FIXTURES / "multifile_asyncapi"
+MULTIFILE_OPENAPI = FIXTURES / "multifile_openapi"
+ENTERPRISE_PUML = FIXTURES / "enterprise_puml"
+
+
+# ── detect.py tests ──────────────────────────────────────────────────────────
+
+
+class TestClassifyFile:
+    def test_classify_openapi_yaml(self):
+        assert classify_file(PETSTORE) == FileType.CODE
+
+    def test_classify_asyncapi_yaml(self):
+        assert classify_file(STREETLIGHTS) == FileType.CODE
+
+    def test_classify_plain_yaml(self, tmp_path):
+        plain = tmp_path / "config.yaml"
+        plain.write_text("name: test\nversion: 1\n")
+        assert classify_file(plain) == FileType.DOCUMENT
+
+    def test_classify_dbml(self):
+        assert classify_file(SOCIAL) == FileType.CODE
+
+    def test_classify_puml(self):
+        assert classify_file(ARCHITECTURE) == FileType.CODE
+
+
+# ── extract_openapi tests ────────────────────────────────────────────────────
+
+
+class TestExtractOpenapi:
+    @pytest.fixture(autouse=True)
+    def _parse(self):
+        self.result = extract_openapi(PETSTORE)
+
+    def test_openapi_returns_nodes_and_edges(self):
+        assert "nodes" in self.result
+        assert "edges" in self.result
+
+    def test_openapi_finds_endpoints(self):
+        labels = {n["label"] for n in self.result["nodes"] if n["type"] == "endpoint"}
+        for ep in ("/pet", "/pet/findByStatus", "/store/inventory", "/user", "/user/login"):
+            assert ep in labels, f"endpoint {ep!r} not found; got {sorted(labels)}"
+
+    def test_openapi_finds_operations(self):
+        labels = {n["label"] for n in self.result["nodes"] if n["type"] == "operation"}
+        for op in ("updatePet", "addPet", "findPetsByStatus", "getPetById",
+                    "getInventory", "placeOrder", "createUser", "loginUser"):
+            assert op in labels, f"operation {op!r} not found; got {sorted(labels)}"
+
+    def test_openapi_finds_schemas(self):
+        labels = {n["label"] for n in self.result["nodes"] if n["type"] == "schema"}
+        for schema in ("Pet", "Order", "User", "Category", "Tag", "ApiResponse", "Error"):
+            assert schema in labels, f"schema {schema!r} not found; got {sorted(labels)}"
+
+    def test_openapi_finds_ref_edges(self):
+        ref_edges = [e for e in self.result["edges"] if e["type"] == "references"]
+        assert len(ref_edges) > 0, "No $ref edges found"
+
+
+# ── extract_asyncapi tests ───────────────────────────────────────────────────
+
+
+class TestExtractAsyncapi:
+    @pytest.fixture(autouse=True)
+    def _parse(self):
+        self.result = extract_asyncapi(STREETLIGHTS)
+
+    def test_asyncapi_returns_nodes_and_edges(self):
+        assert "nodes" in self.result
+        assert "edges" in self.result
+
+    def test_asyncapi_finds_channels(self):
+        labels = {n["label"] for n in self.result["nodes"] if n["type"] == "channel"}
+        for ch in ("lightingMeasured", "lightTurnOn", "lightTurnOff", "lightsDim"):
+            assert ch in labels, f"channel {ch!r} not found; got {sorted(labels)}"
+
+    def test_asyncapi_finds_ref_messages(self):
+        labels = {n["label"] for n in self.result["nodes"] if n["type"] == "message"}
+        assert len(labels) > 0, "No message nodes found from $ref references"
+
+    def test_asyncapi_has_edges(self):
+        assert len(self.result["edges"]) > 0, "No edges found"
+
+
+# ── extract_dbml tests ───────────────────────────────────────────────────────
+
+
+class TestExtractDbml:
+    @pytest.fixture(autouse=True)
+    def _parse(self):
+        self.result = extract_dbml(SOCIAL)
+
+    def test_dbml_finds_tables(self):
+        labels = {n["label"] for n in self.result["nodes"] if n["type"] == "table"}
+        for tbl in ("follows", "users", "posts"):
+            assert tbl in labels, f"table {tbl!r} not found; got {sorted(labels)}"
+
+    def test_dbml_finds_columns(self):
+        labels = {n["label"] for n in self.result["nodes"] if n["type"] == "column"}
+        for col in ("users.id", "users.username", "posts.title", "posts.user_id"):
+            assert col in labels, f"column {col!r} not found; got {sorted(labels)}"
+
+    def test_dbml_finds_has_column_edges(self):
+        col_edges = [e for e in self.result["edges"] if e["type"] == "has_column"]
+        assert len(col_edges) > 0, "No has_column edges found"
+
+    def test_dbml_finds_foreign_keys(self):
+        fk_edges = [e for e in self.result["edges"] if e["type"] == "foreign_key"]
+        assert len(fk_edges) >= 2, f"Expected at least 2 foreign_key edges, got {len(fk_edges)}"
+        # Check posts -> users and users -> follows FK relationships exist
+        pairs = {(e["source"], e["target"]) for e in fk_edges}
+        from graphify.extract import _make_id
+        posts_id = _make_id("dbml", "social", "posts")
+        users_id = _make_id("dbml", "social", "users")
+        follows_id = _make_id("dbml", "social", "follows")
+        assert (posts_id, users_id) in pairs, f"posts->users FK not found; got {pairs}"
+        assert (users_id, follows_id) in pairs, f"users->follows FK not found; got {pairs}"
+
+
+# ── extract_dbml enterprise tests (quoted identifiers, inline refs, named FKs) ──
+
+
+class TestExtractDbmlEnterprise:
+    """Test DBML parser against a real enterprise schema with quoted identifiers,
+    inline column refs, named foreign keys, and 30 tables."""
+
+    @pytest.fixture(autouse=True)
+    def _parse(self):
+        self.result = extract_dbml(KFUL_SCHEMA)
+        self.tables = {n["label"] for n in self.result["nodes"] if n["type"] == "table"}
+        self.columns = {n["label"] for n in self.result["nodes"] if n["type"] == "column"}
+        self.fk_edges = [e for e in self.result["edges"] if e["type"] == "foreign_key"]
+        self.col_edges = [e for e in self.result["edges"] if e["type"] == "has_column"]
+
+    def test_finds_all_30_tables(self):
+        expected_tables = {
+            "amounts_for_routing", "auto_routing_settings",
+            "autoclose_opportunity_settings", "branch_exception_for_routing",
+            "databasechangelog", "databasechangeloglock",
+            "document_groups", "document_types", "documents",
+            "idp_answers", "idp_arisk_condition_answer",
+            "idp_shareholder_risk_types",
+            "kful_category_types", "kful_deal_types",
+            "kful_opportunities", "kful_opportunity_categories",
+            "kful_opportunity_desks", "kful_opportunity_folders",
+            "kful_opportunity_processing_state_types",
+            "kful_opportunity_products", "kful_opportunity_team_members",
+            "kful_product_state_types", "kful_product_types",
+            "kful_sales_method_types", "kful_state_types",
+            "kful_team_role_types",
+            "outbox", "retirement_reason_types",
+            "routing_product_groups", "routing_product_types",
+        }
+        assert self.tables == expected_tables, (
+            f"Missing: {expected_tables - self.tables}, "
+            f"Extra: {self.tables - expected_tables}"
+        )
+
+    def test_quoted_table_names_parsed(self):
+        # All tables in kful_schema.dbml use quoted names like Table "name"
+        assert "kful_opportunities" in self.tables
+        assert "amounts_for_routing" in self.tables
+        assert "databasechangeloglock" in self.tables
+
+    def test_quoted_column_names_parsed(self):
+        # Columns use "quoted" names: "code" varchar(64)
+        for col in (
+            "amounts_for_routing.code",
+            "amounts_for_routing.desk_code",
+            "kful_opportunities.pprb_id",
+            "kful_opportunities.shareholder_risk_criteria_type_code",
+            "documents.document_type_code",
+        ):
+            assert col in self.columns, f"{col!r} not found"
+
+    def test_large_table_columns_count(self):
+        # kful_opportunities has 42 columns
+        opp_cols = [c for c in self.columns if c.startswith("kful_opportunities.")]
+        assert len(opp_cols) >= 40, f"Expected >=40 columns for kful_opportunities, got {len(opp_cols)}"
+
+    def test_databasechangelog_no_indexes_section(self):
+        # databasechangelog has no Indexes block — 14 columns, all should be found
+        cols = [c for c in self.columns if c.startswith("databasechangelog.") and not c.startswith("databasechangeloglock.")]
+        assert len(cols) >= 14, f"Expected >=14 columns for databasechangelog, got {len(cols)}"
+
+    def test_standalone_named_quoted_fk_refs(self):
+        # Ref "fk_document_types2document_groups":"document_groups"."code" < "document_types"."document_group_code"
+        fk_labels = {e["label"] for e in self.fk_edges}
+        expected_fks = [
+            "document_groups.code -> document_types.document_group_code",
+            "document_types.code -> documents.document_type_code",
+            "kful_opportunity_folders.object_id -> documents.kful_opportunities_folder_id",
+            "documents.object_id -> idp_answers.document_id",
+            "retirement_reason_types.code -> kful_state_types.retirement_reason_type_code",
+            "routing_product_groups.code -> routing_product_types.group_code",
+        ]
+        for fk in expected_fks:
+            assert fk in fk_labels, f"FK {fk!r} not found; got {sorted(fk_labels)}"
+
+    def test_kful_opportunities_standalone_fk_refs(self):
+        # Multiple FKs pointing to/from kful_opportunities
+        fk_labels = {e["label"] for e in self.fk_edges}
+        expected = [
+            "kful_state_types.code -> kful_opportunities.kful_state_type_code",
+            "kful_opportunity_processing_state_types.code -> kful_opportunities.processing_state_type_code",
+            "retirement_reason_types.code -> kful_opportunities.retirement_reason_type_code",
+            "kful_opportunities.object_id -> kful_opportunity_categories.kful_opportunity_id",
+            "kful_opportunities.object_id -> kful_opportunity_desks.kful_opportunity_id",
+            "kful_opportunities.object_id -> kful_opportunity_products.kful_opportunity_id",
+            "kful_opportunities.object_id -> kful_opportunity_team_members.kful_opportunity_id",
+        ]
+        for fk in expected:
+            assert fk in fk_labels, f"FK {fk!r} not found"
+
+    def test_inline_refs_extracted(self):
+        # kful_opportunities has inline refs:
+        #   ref: > idp_shareholder_risk_types.code
+        #   ref: > kful_deal_types.code
+        fk_labels = {e["label"] for e in self.fk_edges}
+        assert "kful_opportunities.ai_agent_shareholder_risk_code -> idp_shareholder_risk_types.code" in fk_labels
+        assert "kful_opportunities.kful_deal_type_code -> kful_deal_types.code" in fk_labels
+
+    def test_total_fk_count(self):
+        # 17 standalone Ref lines + 2 inline refs = 19 total
+        assert len(self.fk_edges) == 19, f"Expected 19 FK edges, got {len(self.fk_edges)}"
+
+    def test_has_column_edges_match_columns(self):
+        assert len(self.col_edges) == len(self.columns), (
+            f"has_column edges ({len(self.col_edges)}) != columns ({len(self.columns)})"
+        )
+
+
+# ── extract_plantuml tests ───────────────────────────────────────────────────
+
+
+class TestExtractPlantuml:
+    @pytest.fixture(autouse=True)
+    def _parse(self):
+        self.result = extract_plantuml(ARCHITECTURE)
+
+    def _node_labels(self, ntype=None):
+        if ntype:
+            return {n["label"] for n in self.result["nodes"] if n["type"] == ntype}
+        return {n["label"] for n in self.result["nodes"]}
+
+    def _edge_types(self):
+        return {e["type"] for e in self.result["edges"]}
+
+    def test_plantuml_finds_classes(self):
+        labels = self._node_labels("class")
+        for cls in ("UserService", "OrderService", "PaymentGateway",
+                     "UserRepository", "OrderRepository"):
+            assert cls in labels, f"class {cls!r} not found; got {sorted(labels)}"
+
+    def test_plantuml_finds_interfaces(self):
+        labels = self._node_labels("interface")
+        for iface in ("IRepository", "IService"):
+            assert iface in labels, f"interface {iface!r} not found; got {sorted(labels)}"
+
+    def test_plantuml_finds_actors(self):
+        labels = self._node_labels("actor")
+        for act in ("Customer", "Admin"):
+            assert act in labels, f"actor {act!r} not found; got {sorted(labels)}"
+
+    def test_plantuml_finds_components(self):
+        labels = self._node_labels("component")
+        for comp in ("AuthModule", "NotificationModule"):
+            assert comp in labels, f"component {comp!r} not found; got {sorted(labels)}"
+
+    def test_plantuml_finds_inheritance(self):
+        assert "inheritance" in self._edge_types()
+
+    def test_plantuml_finds_association(self):
+        assert "association" in self._edge_types()
+
+    def test_plantuml_finds_dependency(self):
+        assert "dependency" in self._edge_types()
+
+    def test_plantuml_finds_composition(self):
+        assert "composition" in self._edge_types()
+
+    def test_plantuml_finds_aggregation(self):
+        assert "aggregation" in self._edge_types()
+
+
+# ── extract_yaml_dispatch tests ──────────────────────────────────────────────
+
+
+class TestYamlDispatch:
+    def test_yaml_dispatch_openapi(self):
+        result = extract_yaml_dispatch(PETSTORE)
+        direct = extract_openapi(PETSTORE)
+        assert result == direct
+
+    def test_yaml_dispatch_asyncapi(self):
+        result = extract_yaml_dispatch(STREETLIGHTS)
+        direct = extract_asyncapi(STREETLIGHTS)
+        assert result == direct
+
+    def test_yaml_dispatch_plain_yaml(self, tmp_path):
+        plain = tmp_path / "config.yaml"
+        plain.write_text("name: test\nversion: 1\n")
+        result = extract_yaml_dispatch(plain)
+        assert result == {"nodes": [], "edges": []}
+
+
+# ── Multi-file AsyncAPI tests ───────────────────────────────────────────────
+
+
+class TestMultiFileAsyncAPI:
+    """Test cross-file $ref resolution for multi-file AsyncAPI specs."""
+
+    MAIN_SPEC = MULTIFILE_ASYNCAPI / "specs" / "asyncapi.yaml"
+
+    @pytest.fixture(autouse=True)
+    def _parse(self):
+        self.result = extract_yaml_dispatch(self.MAIN_SPEC)
+        self.nodes = self.result["nodes"]
+        self.edges = self.result["edges"]
+        self.node_labels = {n["label"] for n in self.nodes}
+        self.node_types = {n["label"]: n["type"] for n in self.nodes}
+
+    # 1. Channels resolved from external $ref channel.yaml files
+    def test_multifile_resolves_channels(self):
+        channel_labels = {n["label"] for n in self.nodes if n["type"] == "channel"}
+        assert "KFULSOURCES.KFUL.KFUL_OPPORTUNITY_STATE" in channel_labels
+        assert "KFULSOURCES.KFUL.MASS_SEND" in channel_labels
+
+    # 2. Model/schema nodes created from recursively resolved external refs
+    def test_multifile_resolves_models(self):
+        schema_labels = {n["label"] for n in self.nodes if n["type"] == "schema"}
+        assert "KfulOpportunityStateDto" in schema_labels
+        assert "MassSendDto" in schema_labels
+        assert "KafkaHeaders" in schema_labels
+
+    # 3. Edges connecting channel context to models
+    def test_multifile_channel_edges(self):
+        edge_targets = {e["target"] for e in self.edges if e["type"] == "external_ref"}
+        # Should have edges pointing to the three schema nodes
+        schema_ids = {n["id"] for n in self.nodes if n["type"] == "schema"}
+        assert len(edge_targets & schema_ids) >= 3, (
+            f"Expected at least 3 external_ref edges to schemas, "
+            f"got targets={edge_targets}, schemas={schema_ids}"
+        )
+
+    # 4. No unresolved $ref strings remain as raw node labels
+    def test_multifile_no_unresolved_refs(self):
+        for n in self.nodes:
+            assert "$ref" not in n["label"], (
+                f"Unresolved $ref in node label: {n}"
+            )
+        for e in self.edges:
+            assert e["source"] != "", f"Empty source in edge: {e}"
+            assert e["target"] != "", f"Empty target in edge: {e}"
+
+    # 5. Reasonable counts of nodes and edges (multi-file produces more than single)
+    def test_multifile_total_nodes_and_edges(self):
+        assert len(self.nodes) >= 8, (
+            f"Expected at least 8 nodes from multi-file spec, got {len(self.nodes)}"
+        )
+        assert len(self.edges) >= 3, (
+            f"Expected at least 3 edges from multi-file spec, got {len(self.edges)}"
+        )
+        # Multi-file should produce more nodes than the 2 channels alone
+        channel_count = sum(1 for n in self.nodes if n["type"] == "channel")
+        non_channel_count = len(self.nodes) - channel_count
+        assert non_channel_count >= 3, (
+            f"Expected at least 3 non-channel nodes (schemas, messages, etc), "
+            f"got {non_channel_count}"
+        )
+
+    # 6. Cycle prevention: A refs B, B refs A — no infinite loop
+    def test_resolve_external_refs_cycle_prevention(self, tmp_path):
+        # Create two files that reference each other
+        file_a = tmp_path / "a.yaml"
+        file_b = tmp_path / "b.yaml"
+
+        file_a.write_text(
+            "asyncapi: 3.0.0\n"
+            "channels:\n"
+            "  TestChannel:\n"
+            "    messages:\n"
+            "      payload:\n"
+            f"        $ref: ./b.yaml#/components/schemas/ModelB\n"
+        )
+        file_b.write_text(
+            "components:\n"
+            "  schemas:\n"
+            "    ModelB:\n"
+            "      type: object\n"
+            "      properties:\n"
+            "        back_ref:\n"
+            f"          $ref: ./a.yaml#/components/schemas/ModelA\n"
+        )
+
+        nodes: list[dict] = []
+        edges: list[dict] = []
+        seen_ids: set[str] = set()
+
+        # Should complete without hanging or raising
+        _resolve_external_refs(file_a, nodes, edges, seen_ids, "test")
+
+        # Verify it produced some output without looping forever
+        assert isinstance(nodes, list)
+        assert isinstance(edges, list)
+
+    # 7. Graceful handling when $ref points to nonexistent file
+    def test_resolve_external_refs_missing_file(self, tmp_path):
+        spec = tmp_path / "spec.yaml"
+        spec.write_text(
+            "asyncapi: 3.0.0\n"
+            "channels:\n"
+            "  TestChannel:\n"
+            "    $ref: ./nonexistent/channel.yaml\n"
+            "    messages:\n"
+            "      payload:\n"
+            "        $ref: ./does_not_exist.yaml#/components/schemas/Ghost\n"
+        )
+
+        nodes: list[dict] = []
+        edges: list[dict] = []
+        seen_ids: set[str] = set()
+
+        # Should not raise — missing files are silently skipped
+        _resolve_external_refs(spec, nodes, edges, seen_ids, "test")
+
+        # No nodes or edges created for missing refs
+        ghost_labels = {n["label"] for n in nodes}
+        assert "Ghost" not in ghost_labels, "Should not create node for missing file ref"
+
+    # 8. Single-file AsyncAPI still works after multi-file changes
+    def test_single_file_still_works(self):
+        result = extract_yaml_dispatch(STREETLIGHTS)
+        direct = extract_asyncapi(STREETLIGHTS)
+        # The dispatch result should contain at least everything from direct extraction
+        direct_labels = {n["label"] for n in direct["nodes"]}
+        dispatch_labels = {n["label"] for n in result["nodes"]}
+        assert direct_labels.issubset(dispatch_labels), (
+            f"Single-file AsyncAPI dispatch missing nodes: "
+            f"{direct_labels - dispatch_labels}"
+        )
+        # Channel nodes should still be present
+        channel_labels = {n["label"] for n in result["nodes"] if n["type"] == "channel"}
+        for ch in ("lightingMeasured", "lightTurnOn", "lightTurnOff", "lightsDim"):
+            assert ch in channel_labels, f"channel {ch!r} missing after multi-file changes"
+
+
+# ── Multi-file OpenAPI tests ────────────────────────────────────────────────
+
+
+class TestMultiFileOpenAPI:
+    """Test cross-file $ref resolution for multi-file OpenAPI specs."""
+
+    MAIN_SPEC = MULTIFILE_OPENAPI / "openapi" / "PreTrade" / "salesources-be" / "mass-send.yaml"
+
+    @pytest.fixture(autouse=True)
+    def _parse(self):
+        self.result = extract_yaml_dispatch(self.MAIN_SPEC)
+        self.nodes = self.result["nodes"]
+        self.edges = self.result["edges"]
+        self.node_labels = {n["label"] for n in self.nodes}
+        self.node_types = {n["label"]: n["type"] for n in self.nodes}
+
+    # 1. Endpoint node for /mass-send POST is found
+    def test_multifile_openapi_resolves_endpoint(self):
+        endpoint_labels = {n["label"] for n in self.nodes if n["type"] == "endpoint"}
+        assert "/mass-send" in endpoint_labels, (
+            f"endpoint '/mass-send' not found; got {sorted(endpoint_labels)}"
+        )
+
+    # 2. MassSendRqDto schema node is created (resolved from external $ref)
+    def test_multifile_openapi_resolves_request_schema(self):
+        schema_labels = {n["label"] for n in self.nodes if n["type"] == "schema"}
+        assert "MassSendRqDto" in schema_labels, (
+            f"schema 'MassSendRqDto' not found; got {sorted(schema_labels)}"
+        )
+
+    # 3. MassSendRsDto schema node is created
+    def test_multifile_openapi_resolves_response_schema(self):
+        schema_labels = {n["label"] for n in self.nodes if n["type"] == "schema"}
+        assert "MassSendRsDto" in schema_labels, (
+            f"schema 'MassSendRsDto' not found; got {sorted(schema_labels)}"
+        )
+
+    # 4. Deeply-nested refs are resolved (3 levels: main → RqDto → ObjectIds → ObjectId)
+    def test_multifile_openapi_deep_ref_chain(self):
+        schema_labels = {n["label"] for n in self.nodes if n["type"] == "schema"}
+        for name in ("LocalDateTime", "ObjectIds", "ObjectId"):
+            assert name in schema_labels, (
+                f"deep ref schema {name!r} not found; got {sorted(schema_labels)}"
+            )
+
+    # 5. Edges exist connecting endpoints to schemas (external_ref type)
+    def test_multifile_openapi_ref_edges(self):
+        ext_ref_edges = [e for e in self.edges if e["type"] == "external_ref"]
+        assert len(ext_ref_edges) >= 2, (
+            f"Expected at least 2 external_ref edges, got {len(ext_ref_edges)}: {ext_ref_edges}"
+        )
+        # At minimum, the main file should have edges to MassSendRqDto and MassSendRsDto
+        edge_labels = {e["label"] for e in ext_ref_edges}
+        assert any("MassSendRqDto" in lbl for lbl in edge_labels), (
+            f"No external_ref edge to MassSendRqDto; got {sorted(edge_labels)}"
+        )
+        assert any("MassSendRsDto" in lbl for lbl in edge_labels), (
+            f"No external_ref edge to MassSendRsDto; got {sorted(edge_labels)}"
+        )
+
+    # 6. No raw $ref strings remain in node labels
+    def test_multifile_openapi_no_unresolved_refs(self):
+        for n in self.nodes:
+            assert "$ref" not in n["label"], (
+                f"Unresolved $ref in node label: {n}"
+            )
+        for e in self.edges:
+            assert e["source"] != "", f"Empty source in edge: {e}"
+            assert e["target"] != "", f"Empty target in edge: {e}"
+
+    # 7. Multi-file produces more nodes than single-file (external schemas resolved)
+    def test_multifile_openapi_node_count(self):
+        assert len(self.nodes) >= 4, (
+            f"Expected at least 4 nodes from multi-file spec, got {len(self.nodes)}"
+        )
+        # Should have the endpoint plus multiple external schemas
+        schema_count = sum(1 for n in self.nodes if n["type"] == "schema")
+        assert schema_count >= 2, (
+            f"Expected at least 2 schema nodes (resolved external refs), got {schema_count}"
+        )
+
+    # 8. Single-file OpenAPI (petstore) still works correctly
+    def test_single_file_openapi_still_works(self):
+        result = extract_yaml_dispatch(PETSTORE)
+        direct = extract_openapi(PETSTORE)
+        # Dispatch result should contain at least everything from direct extraction
+        direct_labels = {n["label"] for n in direct["nodes"]}
+        dispatch_labels = {n["label"] for n in result["nodes"]}
+        assert direct_labels.issubset(dispatch_labels), (
+            f"Single-file OpenAPI dispatch missing nodes: "
+            f"{direct_labels - dispatch_labels}"
+        )
+        # Endpoints should still be present
+        endpoint_labels = {n["label"] for n in result["nodes"] if n["type"] == "endpoint"}
+        for ep in ("/pet", "/pet/findByStatus", "/store/inventory", "/user"):
+            assert ep in endpoint_labels, f"endpoint {ep!r} missing after multi-file changes"
+
+
+# ── Enterprise PlantUML sequence diagram tests ────────────────────────────
+
+
+class TestExtractPlantumlEnterprise:
+    """Test extract_plantuml on enterprise sequence diagrams with complex syntax.
+
+    These fixtures use participant declarations with quoted names + aliases,
+    sequence diagram arrows (-> <-> -->), alt/else blocks, notes, !include
+    directives, ref-over frames, destroy keywords, and Cyrillic text.
+    The parser was built for class/component diagrams, so sequence-diagram-
+    specific constructs (alt/else, notes, ref over, destroy) are silently
+    ignored — we verify no crashes and that participants/arrows are extracted.
+    """
+
+    PAYMENT_DELETE = ENTERPRISE_PUML / "payment_delete.puml"
+    REESTR = ENTERPRISE_PUML / "payments_reestr_full_list.puml"
+
+    # ── payment_delete.puml ──────────────────────────────────────────────
+
+    def test_payment_delete_parses_without_error(self):
+        """Parser must not crash on complex sequence diagram syntax."""
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        assert isinstance(result, dict)
+        assert "nodes" in result and "edges" in result
+
+    def test_payment_delete_finds_actors(self):
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        actor_labels = {n["label"] for n in result["nodes"] if n["type"] == "actor"}
+        assert "User" in actor_labels, f"actor 'User' not found; got {sorted(actor_labels)}"
+
+    def test_payment_delete_finds_participants(self):
+        """Participant declarations with quoted names and aliases are extracted."""
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        participant_labels = {n["label"] for n in result["nodes"] if n["type"] == "participant"}
+        assert "IB_P_FE" in participant_labels, (
+            f"participant 'IB_P_FE' not found; got {sorted(participant_labels)}"
+        )
+        assert "IB_P_BE" in participant_labels, (
+            f"participant 'IB_P_BE' not found; got {sorted(participant_labels)}"
+        )
+
+    def test_payment_delete_returns_nodes(self):
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        # 1 actor (User) + 2 participants (IB_P_FE, IB_P_BE) = 3 declared entities
+        assert len(result["nodes"]) >= 3, (
+            f"Expected at least 3 nodes (1 actor + 2 participants), got {len(result['nodes'])}"
+        )
+
+    def test_payment_delete_returns_edges(self):
+        """Sequence diagram arrows (-> <->) are captured as edges."""
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        assert len(result["edges"]) > 0, "Expected edges from sequence diagram arrows"
+        edge_types = {e["type"] for e in result["edges"]}
+        # The file contains -> (message) and <-> (bidirectional) arrows
+        assert "message" in edge_types or "bidirectional" in edge_types, (
+            f"Expected 'message' or 'bidirectional' edge types; got {sorted(edge_types)}"
+        )
+
+    # ── payments_reestr_full_list.puml ───────────────────────────────────
+
+    def test_reestr_finds_all_participants(self):
+        """The reestr file declares 4 participants + 1 actor = 5 entities."""
+        result = extract_plantuml(self.REESTR)
+        participant_labels = {n["label"] for n in result["nodes"] if n["type"] == "participant"}
+        for name in ("IB_P_FE", "IB_P_BE", "IBV_BE", "ST_BE"):
+            assert name in participant_labels, (
+                f"participant {name!r} not found; got {sorted(participant_labels)}"
+            )
+        actor_labels = {n["label"] for n in result["nodes"] if n["type"] == "actor"}
+        # Actor is declared as: actor Пользователь as user
+        # The parser captures the first word after 'actor' = Пользователь
+        assert "Пользователь" in actor_labels, (
+            f"actor 'Пользователь' not found; got {sorted(actor_labels)}"
+        )
+
+    def test_reestr_self_call_edges(self):
+        """Self-calls like IBV_BE -> IBV_BE are captured as edges."""
+        result = extract_plantuml(self.REESTR)
+        self_edges = [e for e in result["edges"] if e["source"] == e["target"]]
+        assert len(self_edges) >= 2, (
+            f"Expected at least 2 self-call edges; got {len(self_edges)}"
+        )
+
+    def test_reestr_returns_nodes_and_edges(self):
+        result = extract_plantuml(self.REESTR)
+        assert len(result["nodes"]) > 0, "Expected at least one node"
+        assert len(result["edges"]) > 0, "Expected at least one edge"
+
+    # ── Cross-cutting concerns ──────────────────────────────────────────
+
+    def test_include_directives_ignored(self):
+        """!include lines must not cause errors or produce garbage nodes."""
+        result = extract_plantuml(self.PAYMENT_DELETE)
+        for n in result["nodes"]:
+            assert "include" not in n["label"].lower(), (
+                f"!include directive leaked into node: {n}"
+            )
+            assert "skinparam" not in n["label"].lower(), (
+                f"skinparam directive leaked into node: {n}"
+            )
+
+    def test_cyrillic_labels_handled(self):
+        """Nodes with Cyrillic labels are handled without errors."""
+        result = extract_plantuml(self.REESTR)
+        # The actor "Пользователь" has a Cyrillic name
+        all_labels = {n["label"] for n in result["nodes"]}
+        assert "Пользователь" in all_labels, (
+            f"Cyrillic label 'Пользователь' not found; got {sorted(all_labels)}"
+        )
+
+    # ── corporate_request_edit.puml ─────────────────────────────────────
+
+    CORPORATE_EDIT = ENTERPRISE_PUML / "corporate_request_edit.puml"
+    MASS_SEND = ENTERPRISE_PUML / "corporate_request_mass_send.puml"
+
+    def test_corporate_edit_parses_without_error(self):
+        """Parser must not crash on autonumber, activate/deactivate, inline [[links]], etc."""
+        result = extract_plantuml(self.CORPORATE_EDIT)
+        assert isinstance(result, dict)
+        assert "nodes" in result and "edges" in result
+        assert len(result["nodes"]) > 0
+
+    def test_corporate_edit_finds_actors_and_participants(self):
+        """Actor 'Пользователь'/User + participants CR_APP and CR_BE are found."""
+        result = extract_plantuml(self.CORPORATE_EDIT)
+        actor_labels = {n["label"] for n in result["nodes"] if n["type"] == "actor"}
+        participant_labels = {n["label"] for n in result["nodes"] if n["type"] == "participant"}
+        # The actor is declared as: actor "Пользователь" as User order 10
+        # The regex captures the quoted name "Пользователь"
+        assert "Пользователь" in actor_labels, (
+            f"actor 'Пользователь' not found; got {sorted(actor_labels)}"
+        )
+        assert "CR_APP" in participant_labels, (
+            f"participant 'CR_APP' not found; got {sorted(participant_labels)}"
+        )
+        assert "CR_BE" in participant_labels, (
+            f"participant 'CR_BE' not found; got {sorted(participant_labels)}"
+        )
+
+    def test_corporate_edit_activate_deactivate_no_crash(self):
+        """activate/deactivate keywords don't crash or create garbage nodes."""
+        result = extract_plantuml(self.CORPORATE_EDIT)
+        all_labels = {n["label"] for n in result["nodes"]}
+        # activate/deactivate are directives, not entities
+        for label in all_labels:
+            assert "activate" not in label.lower(), (
+                f"activate directive leaked into node: {label}"
+            )
+            assert "deactivate" not in label.lower(), (
+                f"deactivate directive leaked into node: {label}"
+            )
+
+    def test_corporate_edit_edges_count(self):
+        """Verify edge count is reasonable — arrows for User->CR_APP, CR_APP->CR_BE, self-calls, etc."""
+        result = extract_plantuml(self.CORPORATE_EDIT)
+        # The file has many arrows: User->CR_APP, CR_APP->CR_BE, CR_BE->CR_APP,
+        # CR_APP->CR_APP (self-calls), CR_APP-->User (return), plus error handling alt blocks
+        assert len(result["edges"]) >= 10, (
+            f"Expected at least 10 edges; got {len(result['edges'])}"
+        )
+        # Verify self-call edges exist (CR_APP -> CR_APP)
+        self_edges = [e for e in result["edges"] if e["source"] == e["target"]]
+        assert len(self_edges) >= 1, (
+            f"Expected at least 1 self-call edge; got {len(self_edges)}"
+        )
+
+    def test_corporate_edit_inline_links_no_crash(self):
+        """[[...]] hyperlinks inside arrow labels don't crash the parser."""
+        result = extract_plantuml(self.CORPORATE_EDIT)
+        # The file contains arrows with [[link.puml label]] in the text
+        # These should not produce garbage nodes
+        for n in result["nodes"]:
+            assert "[[" not in n["label"], (
+                f"Inline [[link]] leaked into node label: {n}"
+            )
+            assert "]]" not in n["label"], (
+                f"Inline [[link]] leaked into node label: {n}"
+            )
+
+    # ── corporate_request_mass_send.puml ────────────────────────────────
+
+    def test_mass_send_parses_without_error(self):
+        """Parser must not crash on box/end box, queue, loop, sprites."""
+        result = extract_plantuml(self.MASS_SEND)
+        assert isinstance(result, dict)
+        assert "nodes" in result and "edges" in result
+        assert len(result["nodes"]) > 0
+
+    def test_mass_send_finds_participants(self):
+        """SOMETHING and CR_BE participants are found."""
+        result = extract_plantuml(self.MASS_SEND)
+        participant_labels = {n["label"] for n in result["nodes"] if n["type"] == "participant"}
+        assert "SOMETHING" in participant_labels, (
+            f"participant 'SOMETHING' not found; got {sorted(participant_labels)}"
+        )
+        assert "CR_BE" in participant_labels, (
+            f"participant 'CR_BE' not found; got {sorted(participant_labels)}"
+        )
+
+    def test_mass_send_queue_handling(self):
+        """queue keyword is extracted as a participant (same semantics)."""
+        result = extract_plantuml(self.MASS_SEND)
+        participant_labels = {n["label"] for n in result["nodes"] if n["type"] == "participant"}
+        # queue "NOTIFICATIONS.NOTIFICATION_COMMANDS" as Q_NC order 200
+        # Parser supports queue keyword — alias Q_NC should be extracted
+        assert "Q_NC" in participant_labels, (
+            f"queue alias 'Q_NC' not found as participant; got {sorted(participant_labels)}"
+        )
+
+    def test_mass_send_box_no_crash(self):
+        """box ... end box syntax doesn't create garbage nodes or crash."""
+        result = extract_plantuml(self.MASS_SEND)
+        all_labels = {n["label"] for n in result["nodes"]}
+        for label in all_labels:
+            assert "box" not in label.lower() or label in ("box",), (
+                f"box directive leaked into node: {label}"
+            )
+            # Sprite references like <$kafka> should not leak
+            assert "<$" not in label, (
+                f"Sprite reference leaked into node: {label}"
+            )
+
+    def test_mass_send_loop_no_crash(self):
+        """loop ... end block doesn't crash or create garbage nodes."""
+        result = extract_plantuml(self.MASS_SEND)
+        all_labels = {n["label"] for n in result["nodes"]}
+        for label in all_labels:
+            assert "loop" not in label.lower(), (
+                f"loop directive leaked into node: {label}"
+            )
+
+    def test_mass_send_undeclared_participant_edge(self):
+        """Arrow to undeclared NCE doesn't crash; NCE appears as auto-created node."""
+        result = extract_plantuml(self.MASS_SEND)
+        all_labels = {n["label"] for n in result["nodes"]}
+        # NCE is not declared but appears in: CR_BE -> NCE
+        # The relationship regex auto-creates it as a "class" node
+        assert "NCE" in all_labels, (
+            f"Undeclared participant 'NCE' not found in nodes; got {sorted(all_labels)}"
+        )
+        # Verify the edge exists
+        nce_edges = [
+            e for e in result["edges"]
+            if "nce" in e["source"].lower() or "nce" in e["target"].lower()
+        ]
+        assert len(nce_edges) >= 1, (
+            f"Expected at least 1 edge involving NCE; got {len(nce_edges)}"
+        )
+
+    # ── Activity diagram tests (corporate_request_search.puml) ───────────
+
+    CORPORATE_SEARCH = ENTERPRISE_PUML / "corporate_request_search.puml"
+
+    def test_activity_diagram_parses_without_error(self):
+        """Activity diagram with nested ifs, colored actions, notes parses OK."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        assert "nodes" in result
+        assert "edges" in result
+
+    def test_activity_diagram_finds_action_nodes(self):
+        """Action nodes extracted from :text; syntax."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        action_labels = {n["label"] for n in result["nodes"] if n["type"] == "action"}
+        for expected in [
+            "Получение запроса на поиск данных",
+            "Поиск СФЛ по Email",
+            "Поиск контрагента по ОГРН",
+            "Поиск контрагента по ИНН",
+            "Поиск контрагента по наименованию",
+        ]:
+            assert expected in action_labels, (
+                f"Action '{expected}' not found; got {sorted(action_labels)}"
+            )
+
+    def test_activity_diagram_finds_decision_nodes(self):
+        """Decision/if nodes extracted from if (condition?) then syntax."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        decision_labels = {n["label"] for n in result["nodes"] if n["type"] == "decision"}
+        for expected in [
+            "В запросе есть email?",
+            "СФЛ найден?",
+            "Связь найдена?",
+        ]:
+            assert any(expected in d for d in decision_labels), (
+                f"Decision containing '{expected}' not found; got {sorted(decision_labels)}"
+            )
+
+    def test_activity_diagram_colored_actions(self):
+        """#pink: and #blue: colored actions are extracted with color stripped."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        action_labels = {n["label"] for n in result["nodes"] if n["type"] == "action"}
+        # #pink:Ошибка: недостаточно данных; → label should NOT start with #pink
+        assert any("Ошибка" in lbl for lbl in action_labels), (
+            f"Colored #pink action with 'Ошибка' not found; got {sorted(action_labels)}"
+        )
+        assert any("Переход к поиску сделки" in lbl for lbl in action_labels), (
+            f"Colored #blue action 'Переход к поиску сделки' not found; got {sorted(action_labels)}"
+        )
+        # Ensure color prefix is stripped
+        for lbl in action_labels:
+            assert not lbl.startswith("#"), (
+                f"Color prefix not stripped from action label: '{lbl}'"
+            )
+
+    def test_activity_diagram_total_nodes(self):
+        """Activity diagram yields 20+ nodes (12+ actions + 9+ decisions)."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        action_count = sum(1 for n in result["nodes"] if n["type"] == "action")
+        decision_count = sum(1 for n in result["nodes"] if n["type"] == "decision")
+        assert action_count >= 12, f"Expected >=12 action nodes; got {action_count}"
+        assert decision_count >= 9, f"Expected >=9 decision nodes; got {decision_count}"
+        total = action_count + decision_count
+        assert total >= 20, f"Expected >=20 total activity nodes; got {total}"
+
+    def test_activity_diagram_no_crash_on_nested_ifs(self):
+        """Deeply nested if/else/endif (4 levels) doesn't crash."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        # The file has 4 levels of nesting — just verify we get decisions
+        decisions = [n for n in result["nodes"] if n["type"] == "decision"]
+        assert len(decisions) >= 4, (
+            f"Expected >=4 decisions from nested ifs; got {len(decisions)}"
+        )
+
+    def test_activity_diagram_pragma_ignored(self):
+        """!pragma directive doesn't create garbage nodes."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        all_labels = {n["label"] for n in result["nodes"]}
+        for lbl in all_labels:
+            assert "pragma" not in lbl.lower(), (
+                f"Pragma directive leaked into node label: '{lbl}'"
+            )
+
+    def test_activity_diagram_comments_ignored(self):
+        """Single-line comments (' text) don't leak into nodes."""
+        result = extract_plantuml(self.CORPORATE_SEARCH)
+        all_labels = {n["label"] for n in result["nodes"]}
+        for lbl in all_labels:
+            assert "Блок поиска" not in lbl, (
+                f"Comment text leaked into node label: '{lbl}'"
+            )
+            assert "ничего не делаем" not in lbl, (
+                f"Comment text leaked into node label: '{lbl}'"
+            )

@@ -1,0 +1,29 @@
+openapi: 3.0.1
+info:
+  title: mock
+  version: 1.0.0
+servers:
+  - url: "https://mock"
+paths:
+  /mock:
+    head:
+      summary: mock
+      operationId: mock
+      responses:
+        "200":
+          description: mock
+components:
+  schemas:
+    KfulOpportunityStateDto:
+      type: object
+      description: Состояние сделки КФЮЛ
+      properties:
+        generalInfo:
+          $ref: ./GeneralInfoDto.yaml#/components/schemas/GeneralInfoDto
+        kfulStateType:
+          $ref: ./KfulStateTypeDto.yaml#/components/schemas/KfulStateTypeDto
+        id:
+          type: string
+        messageType:
+          type: string
+          example: 'KfulOpportunityStateMessageDto'

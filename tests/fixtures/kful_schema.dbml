@@ -1,0 +1,548 @@
+Table "amounts_for_routing" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar(256) [not null, note: 'Наименование']
+  "desk_code" varchar(64) [not null, note: 'Код деска']
+  "amount_strong" numeric [note: 'Сумма  сильной сделки']
+  "did_products_amount_strong" numeric [not null, note: 'Сумма по продуктам']
+  "amount_weak" numeric [default: `'4000000000'::bigint`, note: 'Сумма слабой сделки']
+
+
+  Indexes {
+    code [pk, name: "PK_AMOUNTS_FOR_ROUTING#CODE"]
+  }
+  Note: 'Справочник суммы для сделки для определения Деска при маршрутизации'
+}
+
+
+Table "auto_routing_settings" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar(256) [not null, note: 'Наименование']
+  "shareholder_risk_criteria_type_code" varchar(64) [not null, note: 'Код акционерного риска']
+  "desk_code" varchar(64) [not null, note: 'Код деска']
+  "desk_role_code" varchar(64) [not null, note: 'Роль деска']
+  "need_autoroute" bool [not null, note: 'Признак необходимости автомаршрутизации']
+
+
+  Indexes {
+    code [pk, name: "PK_AUTO_ROUTING_SETTINGS#CODE"]
+  }
+  Note: 'Справочник настройка автоматической маршрутизации'
+}
+
+
+Table "autoclose_opportunity_settings" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar(256) [not null, note: 'Наименование']
+  "shareholder_risk_criteria_type_code" varchar(64) [not null, note: 'Код акционерного риска']
+  "need_close" bool [not null, note: 'Признак необходимости автозакрытия']
+
+
+  Indexes {
+    code [pk, name: "PK_AUTOCLOSE_OPPORTUNITY_SETTINGS#CODE"]
+  }
+  Note: 'Справочник настройки автоматического закрытия сделок'
+}
+
+
+Table "branch_exception_for_routing" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar(256) [not null, note: 'Наименование']
+  "desk_code" varchar(64) [not null, note: 'Код деска']
+  "branch_code" varchar(64) [not null, note: 'Код территориального банка']
+
+
+  Indexes {
+    code [pk, name: "PK_BRANCH_EXCEPTION_FOR_ROUTING#CODE"]
+  }
+  Note: 'Справочник территориальные банки исключения для маршрутизации'
+}
+
+
+Table "databasechangelog" {
+  "id" varchar(255) [not null, note: 'Уникальный идентификатор']
+  "author" varchar(255) [not null, note: 'Автор']
+  "filename" varchar(255) [not null, note: 'Название файла миграции']
+  "dateexecuted" timestamp [not null, note: 'Дата установки миграции']
+  "orderexecuted" int4 [not null, note: 'Порядок установки миграци']
+  "exectype" varchar(10) [not null, note: 'Признак установки миграции']
+  "md5sum" varchar(35) [note: 'Хеш сумма']
+  "description" varchar(255) [note: 'Описание']
+  "comments" varchar(255) [note: 'Коментарии']
+  "tag" varchar(255) [note: 'Техничесское поле']
+  "liquibase" varchar(20) [note: 'Версия библиотеки liquibase']
+  "contexts" varchar(255) [note: 'Контекс миграции']
+  "labels" varchar(255) [note: 'Метки миграции']
+  "deployment_id" varchar(10) [note: 'Уникальный идентификатор установки']
+  Note: 'Таблица описания миграций'
+}
+
+
+Table "databasechangeloglock" {
+  "id" int4 [not null, note: 'Уникальный идентификатор']
+  "locked" bool [not null, note: 'Признак блокировки миграции']
+  "lockgranted" timestamp [note: 'Дата блокировки']
+  "lockedby" varchar(255) [note: 'Сылка на блокирующую миграцию']
+
+
+  Indexes {
+    id [pk, name: "databasechangeloglock_pkey"]
+  }
+  Note: 'Таблица блокировок миграции'
+}
+
+
+Table "document_groups" {
+  "code" varchar(256) [not null, note: 'Код']
+  "name" varchar(256) [not null, note: 'Наименование']
+  "label_list" varchar(256) [not null, note: 'Наименование краткое']
+  "label_opportunity" varchar(256) [not null, note: 'Наименование полное']
+
+
+  Indexes {
+    code [pk, name: "PK_DOCUMENT_GROUPS#CODE"]
+  }
+  Note: 'Справочник группы документов'
+}
+
+
+Table "idp_shareholder_risk_types" {
+  "code" varchar(256) [not null, note: 'Код']
+  "name" varchar(256) [not null, note: 'Наименовани']
+
+
+  Indexes {
+    code [pk, name: "PK_IDP_CHECKING_DOCUMENTS_RESULT#CODE"]
+  }
+  Note: 'Справочник тип акционерного риска в документе'
+}
+
+
+Table "kful_category_types" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar(256) [not null, note: 'Наименование']
+  "kful_code" varchar(256) [not null, note: 'Код категории']
+  "kful_group_code" varchar(64) [note: 'Код группы категории']
+  "new_product_sign" bool [note: 'Признак сделки с изменениями', not null]
+
+
+  Indexes {
+    code [pk, name: "PK_KFUL_CATEGORY_TYPES#CODE"]
+  }
+  Note: 'Справочник категорий сделок кредитной фабрики'
+}
+
+
+Table "kful_opportunity_folders" {
+  "object_id" varchar(36) [not null, note: 'Уникальный идентификатор']
+  "ecm_folder_id" varchar(38) [not null, note: 'Уникальный идентификатор папки в электронном каталоге документов']
+  "message_id" varchar(36) [note: 'Уникальный идентификатор сообщения']
+  "start_date" date [not null, note: 'Дата подписания на папку']
+  "end_date" date [note: 'Дата завершения отслеживания папки']
+  "signing_status" bool [note: 'Признак подписания']
+  "number_attempts" int4 [not null, note: 'Количество попыток подписки на папку']
+  "last_sent_date" timestamp [note: 'Время последней отправки сообщения на подпись']
+  "lock" int8 [default: 0, note: 'Параметр блокировки таблицы']
+
+
+  Indexes {
+    object_id [pk, name: "PK_KFUL_OPPORTUNITY_FOLDERS#OBJECT_ID"]
+    ecm_folder_id [unique, name: "kful_opportunity_folders_ecm_folder_id_key"]
+    message_id [type: btree, name: "INDEX_KFUL_OPPORTUNITY_FOLDERS#MESSAGE_ID"]
+  }
+  Note: 'Папки сделки кредитной фабрики'
+}
+
+
+Table "kful_opportunity_processing_state_types" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar(256) [not null, note: 'Наименование']
+
+
+  Indexes {
+    code [pk, name: "PK_KFUL_OPPORTUNITY_PROCESSING_STATE_TYPES#CODE"]
+  }
+  Note: 'Справочник стадий маршрутизации'
+}
+
+
+Table "kful_product_state_types" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar [not null, note: 'Наименование']
+  "kful_code" varchar [not null, note: 'Код кредитной фабрики']
+  "required_dmb" bool [not null, note: 'Признак интереса департамента инвестиционной деятельности']
+
+
+  Indexes {
+    code [pk, name: "PK_KFUL_PRODUCT_STATE_TYPES#CODE"]
+  }
+  Note: 'Справочник статусов продуктов сделки кредитной фабрики'
+}
+
+
+Table "kful_product_types" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar [not null, note: 'Наименование']
+  "kful_code" varchar [not null, note: 'Код продукта в кредитной фабрике']
+  "required_dmb" bool [not null, note: 'Признак интереса департамента инвестиционной деятельности']
+
+
+  Indexes {
+    code [pk, name: "PK_KFUL_PRODUCT_TYPES#CODE"]
+  }
+  Note: 'Справочник типов продуктов кредитной фабрики'
+}
+
+
+Table "kful_sales_method_types" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar [not null, note: 'Наименование']
+  "kful_code" varchar [not null, note: 'Код продукта в кредитной фабрике']
+  "required_dmb" bool [not null, note: 'Признак интереса департамента инвестиционной деятельности']
+
+
+  Indexes {
+    code [pk, name: "PK_KFUL_SALES_METHOD_TYPES#CODE"]
+  }
+  Note: 'Справочник методов продаж сделки кредитной фабрики'
+}
+
+
+Table "kful_team_role_types" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar [not null, note: 'Наименование']
+  "kful_code" varchar [not null, note: 'Код роли в кредитной фабрике']
+
+
+  Indexes {
+    code [pk, name: "PK_KFUL_TEAM_ROLE_TYPES#CODE"]
+  }
+  Note: 'Справочник ролей команды сделки кредитной фабрики'
+}
+
+
+Table "outbox" {
+  "object_id" varchar(36) [not null, note: 'Уникальный идентификатор']
+  "message" varchar [not null, note: 'Сообщение']
+  "topic" varchar(64) [not null, note: 'Топик']
+  "type" varchar(32) [not null, note: 'Тип']
+  "create_datetime" timestamp [note: 'Дата создания']
+
+
+  Indexes {
+    object_id [pk, name: "PK_OUTBOX#OBJECT_ID"]
+  }
+  Note: 'Таблица для отправки событий в кафку'
+}
+
+
+Table "retirement_reason_types" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar(256) [not null, note: 'Наименование']
+  "opportunity_autoclose_retirement_reason_type_code" varchar(64) [note: 'Причина автозакрытия сделки департамента инвестиционной деятельности']
+  "available_to_user" bool [not null, note: 'Признак доступности пользователю']
+
+
+  Indexes {
+    code [pk, name: "PK_RETIREMENT_REASON_TYPES#CODE"]
+  }
+  Note: 'Справочник причин выбытия сделки'
+}
+
+
+Table "routing_product_groups" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar(64) [not null, note: 'Наименование']
+
+
+  Indexes {
+    code [pk, name: "pk_routing_product_groups"]
+  }
+  Note: 'Справочник групп продуктов для маршрутизации'
+}
+
+
+Table "document_types" {
+  "code" varchar(256) [not null, note: 'Код']
+  "name" varchar(256) [not null, note: 'Наименование']
+  "document_group_code" varchar(36) [not null, note: 'Код группы документов']
+
+
+  Indexes {
+    code [pk, name: "PK_DOCUMENT_TYPES#CODE"]
+  }
+  Note: 'Справочник типы документов'
+}
+
+
+Table "documents" {
+  "object_id" varchar(36) [not null, note: 'Уникальный индентификатор']
+  "document_id" varchar(38) [not null, note: 'Уникальный индентификатор документа']
+  "document_type_code" varchar(255) [not null, note: 'Код типа документа']
+  "kful_opportunities_folder_id" varchar(36) [not null, note: 'Код папки сделки']
+  "idp_availability_arisk" bool [note: 'Наличие акционерного риска']
+
+
+  Indexes {
+    object_id [pk, name: "PK_DOCUMENTS#OBJECT_ID"]
+    document_id [type: btree, name: "INDEX_DOCUMENTS#DOCUMENT_ID"]
+  }
+  Note: 'Документы'
+}
+
+
+Table "idp_answers" {
+  "object_id" varchar(36) [not null, note: 'Уникальный идентификатор']
+  "document_id" varchar(36) [not null, note: 'Уникальный индентификатор документа']
+  "idp_name_question" varchar [note: 'Номер вопроса анализатора']
+  "idp_question" varchar [note: 'Формулировка вопроса анализатора']
+  "idp_answer" varchar [note: 'Ответ анализатора']
+  "idp_date_time_answer" timestamp [note: 'Дата получения ответа анализатора']
+  "idp_presence_arisk" bool [note: 'Наличие критерия акционерного риска']
+
+
+  Indexes {
+    object_id [pk, name: "PK_IDP_ANSWERS#OBJECT_ID"]
+    document_id [type: btree, name: "IDP_ANSWERS#DOCUMENT_ID"]
+  }
+  Note: 'Ответы анализатора документов'
+}
+
+
+Table "idp_arisk_condition_answer" {
+  "object_id" varchar [not null, note: 'Уникальный идентификатор']
+  "document_type_code" varchar(255) [not null, note: 'Код типа документа']
+  "idp_name_question" varchar [note: 'Номер вопроса анализатора']
+  "idp_arisk_target_indicator" varchar [note: 'Ожидаемые ответы']
+  "idp_arisk_condition" varchar [note: 'Критерий оценки']
+  "idp_arisk_condition_consider" bool [note: 'Признак существенности ответа']
+  "expected_response_type" varchar [note: 'Ожидаемый формат ответа']
+  "desks_codes" varchar [note: 'Коды десков для оценки существенности ответа']
+
+
+  Indexes {
+    object_id [pk, name: "PK_IDP_ARISK_CONDITION_ANSWER#OBJECT_ID"]
+    (document_type_code, idp_name_question) [unique, name: "idp_arisk_condition_answer_unique_constraint_on_2_fields"]
+    (document_type_code, idp_name_question) [type: btree, name: "IDP_ARISK_CONDITION_ANSWER#DOCUMENT_TYPE_CODE_AND_IDP_NAME_QUESTION"]
+  }
+  Note: 'Критерии оценки ответов анализатора документов'
+}
+
+
+Table "kful_state_types" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar [not null, note: 'Наименование']
+  "kful_code" varchar [not null, note: 'Код в кредитной фабрике']
+  "required_dmb_strong_opportunities" bool [not null, note: 'Признак интереса для сильной сделки']
+  "required_dmb_weak_opportunities" bool [not null, note: 'Признак интереса для слабой сделки']
+  "terminal" bool [not null, note: 'Призназ закрытия сделки']
+  "retirement_reason_type_code" varchar(64) [note: 'Причина выбытия сделки']
+
+
+  Indexes {
+    code [pk, name: "PK_KFUL_STATE_TYPES#CODE"]
+  }
+  Note: 'Справочник статусы сделки кредитной фабрики'
+}
+
+
+Table "routing_product_types" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar [not null, note: 'Наименование']
+  "ckpit_id" varchar [not null, note: 'Уникальный идентификатор центрального каталога продуктов']
+  "shareholder_risk_criteria_type_code" varchar(6) [note: 'Код акционерного риска']
+  "corporate_lending_sign" bool [note: 'Признак корпоративного кредитного продукта']
+  "group_code" varchar(64) [note: 'Код группы продукта']
+  "desk_code" varchar(64) [note: 'Код деска']
+
+
+  Indexes {
+    code [pk, name: "PK_ROUTING_PRODUCT_TYPES#CODE"]
+  }
+  Note: 'Справочник продуктов для маршрутизации'
+}
+
+
+Table "kful_opportunities" {
+  "object_id" varchar(36) [not null, note: 'Уникальный идентификатор']
+  "pprb_id" varchar [not null, note: 'Уникальный идентификатор платформы поддержки развития бизнеса']
+  "crm_id" varchar [note: 'Уникальный идентификатор ЦРМ']
+  "receipt_date" timestamp [note: 'Дата получения сделки']
+  "kful_create_date" timestamp [note: 'Дата изменения сделки кредитной фабрикой']
+  "shareholder_risk_criteria_type_code" varchar(64) [note: 'Критерий акционерного риска']
+  "shareholder_risk_criteria_update_date" timestamp [note: 'Дата обновления акционерного риска']
+  "processing_state_type_code" varchar(64) [not null, note: 'Статус обработки сделки']
+  "retirement_reason_type_code" varchar(64) [note: 'Причина выбытия сделки']
+  "retirement_date" timestamp [note: 'Дата выбытия сделки']
+  "retirement_comment" text [note: 'Комментарий к причине выбытия']
+  "opportunity_object_id" varchar(36) [note: 'Уникальный идентификатор сделки департамента инвестиционной деятельности']
+  "opportunity_id" varchar(36) [note: 'Идентификатор сделки департамента инвестиционной деятельности']
+  "party_object_id" varchar(256) [note: 'Идентификатор клиента сделки']
+  "amount" numeric [note: 'Общий объём сделки']
+  "did_products_amount" numeric [note: 'Общий объём сделки по продуктам департамента инвестиционной деятельности']
+  "branch_code" varchar(64) [note: 'Код территориального банка']
+  "response_kful_date" timestamp [note: 'Дата отправки ответа по сделке в кредитную фабрику']
+  "lock" int8 [default: 0, note: 'Параметр блокировки таблицы']
+  "kful_description" varchar(1024) [note: 'Описание сделки кредитной фабрики']
+  "route_date" timestamp [note: 'Дата маршрутизации']
+  "kful_update_date" timestamp [note: 'Дата обновления информации кредитной фабрикой']
+  "currency_code" varchar(64) [note: 'Код валюты']
+  "pegasus_shareholder_risk" bool [note: 'Акционерный риск из системы пегас']
+  "kful_state_type_code" varchar(64) [note: 'Код статуса сделки кредитной фабрики']
+  "route_comment" text [note: 'Комментарий маршрутизации']
+  "route_error" bool [note: 'Признак ошибки маршрутизации']
+  "desk_to_route_code" varchar(64) [note: 'Код деска маршрутизации']
+  "route_time" timestamp [note: 'Время маршрутизации']
+  "route_count" int4 [default: 0, note: 'Количество попыток маршрутизации']
+  "migration_status_idp" varchar(64) [default: `'NEED_INFO'::charactervarying`, note: 'Статус миграции анализатора']
+  "desks_updated" bool [default: false, note: 'Признак обновления деска']
+  "kful_opportunity_folder_object_id" varchar(36) [note: 'Код папки сделки']
+  "idp_shareholder_risk_code" varchar(256) [default: `'UNKNOWN'::charactervarying`, note: 'Код акционерного риска выявленнго анализатором документов']
+  "idp_checking_document_date" timestamp [note: 'Дата проверки документов анализатором']
+  "document_add_date" timestamp [note: 'Дата добавления документа']
+  "idp_last_answer_date" timestamp [note: 'Дата последнего получения ответа анализатора']
+  "route_controller_number" varchar [note: 'Табельный номер контролера, который выполнил маршрутизацию сделки']
+  "version" int8 [note: 'Номер версии']
+  "ai_agent_processed" bool [default: false, note: 'Признак обработки агентом']
+  "ai_agent_shareholder_risk_code" varchar [default: `'UNKNOWN'::charactervarying`, note: 'Код акционерного риска выявленнго агентом', ref: > idp_shareholder_risk_types.code]
+  "ai_agent_processed_date" timestamp [note: 'Дата проверки агенктом']
+  "ai_agent_comment " varchar [note: 'Комментарий агента по принятию решения']
+  "has_new_product" bool [note: 'Признак наличия нового продукта в сделке', not null]
+  "kful_deal_type_code" varchar [note: 'Тип сделки КФЮЛ', ref: > kful_deal_types.code, not null]
+
+
+
+  Indexes {
+    object_id [pk, name: "PK_KFUL_OPPORTUNITIES#OBJECT_ID"]
+    pprb_id [unique, name: "kful_opportunities_pprb_id_key"]
+    pprb_id [type: btree, name: "INDEX_KFUL_OPPORTUNITIES#PPRB_ID"]
+    processing_state_type_code [type: btree, name: "INDEX_KFUL_OPPORTUNITIES#PROCESSING_STATE_TYPE_CODE"]
+  }
+  Note: 'Сделка кредитной фабрики юридических лиц'
+}
+
+
+Table "kful_opportunity_categories" {
+  "object_id" varchar(36) [not null, note: 'Уникальный идентификатор']
+  "kful_opportunity_id" varchar(36) [not null, note: 'Уникальный идентификатор сделки кредитной фабрики']
+  "category_type_code" varchar(64) [not null, note: 'Код типа категории']
+  "lock" int8 [default: 0, note: 'Параметр блокировки таблицы']
+
+
+  Indexes {
+    object_id [pk, name: "PK_KFUL_OPPORTUNITY_CATEGORIES#OBJECT_ID"]
+  }
+  Note: 'Категории сделки кредитной фабрики'
+}
+
+
+Table "kful_opportunity_desks" {
+  "object_id" varchar(36) [not null, note: 'Уникальный идентификатор']
+  "kful_opportunity_id" varchar(36) [not null, note: 'Уникальный идентификатор сделки кредитной фабрики']
+  "desk_code" varchar(64) [not null, note: 'Код деска']
+  "role_code" varchar(64) [not null, note: 'Код роли']
+  "lock" int8 [default: 0, note: 'Параметр блокировки таблицы']
+
+
+  Indexes {
+    object_id [pk, name: "PK_KFUL_OPPORTUNITY_DESKS#OBJECT_ID"]
+  }
+  Note: 'Дкски сделки кредитной фабрики'
+}
+
+
+Table "kful_opportunity_products" {
+  "object_id" varchar(36) [not null, note: 'Уникальный идентификатор']
+  "kful_opportunity_id" varchar(36) [not null, note: 'Уникальный идентификатор сделки кредитной фабрики']
+  "name" varchar(256) [note: 'Наименование продукта']
+  "ckpit_id" varchar(64) [note: 'Уникальный идентификатор центрального каталога продуктов']
+  "lock" int8 [default: 0, note: 'Параметр блокировки таблицы']
+  "amount" numeric [note: 'Сумма']
+  "currency_code" varchar(64) [note: 'Код валюты']
+  "old_period" int4 [note: 'Период старый']
+  "period" numeric [note: 'Период']
+
+
+  Indexes {
+    object_id [pk, name: "PK_KFUL_OPPORTUNITY_PRODUCTS#OBJECT_ID"]
+  }
+  Note: 'Продукты сделки кредитной фабрики'
+}
+
+
+Table "kful_opportunity_team_members" {
+  "object_id" varchar(36) [not null, note: 'Уникальный идентификатор']
+  "kful_opportunity_id" varchar(36) [not null, note: 'Уникальный идентификатор сделки кредитной фабрики']
+  "personal_number" varchar(64) [not null, note: 'Табельный номер члена команды']
+  "role_code" varchar(64) [note: 'Код роли члена команды']
+  "lock" int8 [default: 0, note: 'Параметр блокировки таблицы']
+  "kful_role_code" varchar [note: 'Код роли в кредитной фабрике']
+
+
+  Indexes {
+    object_id [pk, name: "KFUL_OPPORTUNITY_TEAM_MEMBERS#OBJECT_ID"]
+  }
+  Note: 'Команда сделки кредитной фабрики'
+}
+
+
+Table "kful_deal_types" {
+  "code" varchar(64) [not null, note: 'Код']
+  "name" varchar [not null, note: 'Наименование']
+
+
+  Indexes {
+    code [pk, name: "PK_KFUL_DEAL_TYPES#CODE"]
+  }
+  Note: 'Справочник типов сделок кредитной фабрики юридических лиц'
+}
+
+
+Ref "fk_document_types2document_groups":"document_groups"."code" < "document_types"."document_group_code"
+
+
+Ref "fk_documents2document_types":"document_types"."code" < "documents"."document_type_code"
+
+
+Ref "fk_documents2kful_opportunity_folders":"kful_opportunity_folders"."object_id" < "documents"."kful_opportunities_folder_id"
+
+
+Ref "fk_idp_answers2documents":"documents"."object_id" < "idp_answers"."document_id"
+
+
+Ref "fk_idp_arisk_condition_answer2document_types":"document_types"."code" < "idp_arisk_condition_answer"."document_type_code"
+
+
+Ref "fk_kful_state_types2retirement_reason_types":"retirement_reason_types"."code" < "kful_state_types"."retirement_reason_type_code"
+
+
+Ref "fk_routing_product_types2routing_product_groups":"routing_product_groups"."code" < "routing_product_types"."group_code"
+
+
+Ref "fk_kful_opportunities2idp_shareholder_risk_types":"idp_shareholder_risk_types"."code" < "kful_opportunities"."idp_shareholder_risk_code"
+
+
+Ref "fk_kful_opportunities2kful_opportunity_folders":"kful_opportunity_folders"."object_id" < "kful_opportunities"."kful_opportunity_folder_object_id"
+
+
+Ref "fk_kful_opportunities2kful_state_type":"kful_state_types"."code" < "kful_opportunities"."kful_state_type_code"
+
+
+Ref "fk_kful_opportunities2processing_state_types":"kful_opportunity_processing_state_types"."code" < "kful_opportunities"."processing_state_type_code"
+
+
+Ref "fk_kful_opportunities2retirement_reason_types":"retirement_reason_types"."code" < "kful_opportunities"."retirement_reason_type_code"
+
+
+Ref "fk_kful_opp_categories2kful_opportunities":"kful_opportunities"."object_id" < "kful_opportunity_categories"."kful_opportunity_id"
+
+
+Ref "fk_kful_opportunity_desks2kful_opportunities":"kful_opportunities"."object_id" < "kful_opportunity_desks"."kful_opportunity_id"
+
+
+Ref "fk_kful_opportunity_products2kful_opportunities":"kful_opportunities"."object_id" < "kful_opportunity_products"."kful_opportunity_id"
+
+
+Ref "fk_kful_opportunity_team_members2kful_opportunities":"kful_opportunities"."object_id" < "kful_opportunity_team_members"."kful_opportunity_id"
+
+
+Ref "fk_kful_opportunity_team_members2kful_team_role_types":"kful_team_role_types"."code" < "kful_opportunity_team_members"."role_code"

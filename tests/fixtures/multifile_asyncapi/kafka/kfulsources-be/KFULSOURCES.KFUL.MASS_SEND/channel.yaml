@@ -1,0 +1,9 @@
+address: KFULSOURCES.KFUL.MASS_SEND
+description: Информирование подписчиков при массовой выгрузке
+messages:
+  KfulMassSend:
+    name: KfulMassSend
+    title: Mass Send
+    contentType: application/json
+    payload:
+      $ref: ../../../models/MassSendDto.yaml#/components/schemas/MassSendDto

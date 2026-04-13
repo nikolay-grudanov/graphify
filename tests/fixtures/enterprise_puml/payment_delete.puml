@@ -1,0 +1,71 @@
+@startuml Удаление платежа
+
+
+title Удаление платежа
+!include ../../commons/skinparams.puml
+!include ../../commons/legend.puml
+
+
+'Описание участников процесса
+actor User as User
+participant  "IB_PAYMENTS APP" as IB_P_FE order 20
+participant  "IB_PAYMENTS BE" as IB_P_BE order 100
+
+
+==[[./payment_read_preview.puml Просмотр данных о платеже (Preview)]]==
+
+
+User -> IB_P_FE : Кнопка "Удалить"
+IB_P_FE -> User : Модальное окно "Ожидаемый доход"
+destroy User
+destroy IB_P_FE
+note left $Frontend
+    Данные по платежу будут удалены.
+    Все связанные документы останутся в сделке.
+    Хотите обновить ожидаемый доход?
+end note
+alt требуется редактирование ожидаемого дохода по сделке
+    User -> IB_P_FE : Ввод изменений
+end
+alt Подтверждение удаления
+    User -> IB_P_FE : Кнопка "Подтвердить"
+    IB_P_FE <-> IB_P_BE : Запрос на обновление ожидаемого дохода
+    destroy IB_P_FE
+    destroy IB_P_BE
+    note right $Frontend
+        Для M&A:
+            PUT /ma-opportunities-be/{opportunityType}/{objectId}/general-information/expectedIncome
+        Для DCM/ECM:
+            PUT /dcmecm-be/{dealType}/{objectId}/general-information/expectedIncome
+    end note
+    IB_P_FE <-> IB_P_BE : Запрос краткой информации по сделке
+    note right $Frontend
+        Для M&A sells:
+            GET /ma-opportunities-be/sells/{objectId}/summary
+        Для M&A buys:
+            GET /ma-opportunities-be/buys/{objectId}/summary
+        Для DCM/ECM:
+            GET /dcmecm-be/{dealType}/{objectId}/general-information
+    end note
+    IB_P_FE -> IB_P_BE : Передача запроса на удаление платежа
+    note right $Frontend
+        DELETE /{entityType}/{entityId}/payments/{paymentId}
+    end note
+    IB_P_BE -> IB_P_BE : Удаление платежа
+    IB_P_BE -> IB_P_FE : Ответ на запрос на удаление платежа
+    note right
+        DELETE /{entityType}/{entityId}/payments/{paymentId}
+    end note
+    alt Реестр платежей IB
+        ref over IB_P_FE, IB_P_BE : [[./payments_reestr_full_list.puml Страница всех платежей IB]]
+    else График платежей сделки
+        ref over IB_P_FE, IB_P_BE : [[./payments_reestr_ib_deals.puml График платежей сделки (M&A/DCM/ECM)]]
+    end
+else Отмена удаления
+    IB_P_FE -> User : Закррытие модального окна "Ожидаемый доход"
+    destroy IB_P_FE
+    destroy User
+end
+
+
+@enduml

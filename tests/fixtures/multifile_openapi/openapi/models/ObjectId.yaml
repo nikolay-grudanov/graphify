@@ -1,0 +1,23 @@
+openapi: 3.0.1
+info:
+  title: mock
+  version: 1.0.0
+servers:
+  - url: 'https://mock'
+paths:
+  /mock:
+    head:
+      x-allow-sigma: false
+      operationId: mock
+      summary: mock
+      responses:
+        '200':
+          description: mock
+# <---
+components:
+  schemas:
+    ObjectId:
+      type: integer
+      format: int64
+      description: Идентификатор объекта
+      minimum: 1

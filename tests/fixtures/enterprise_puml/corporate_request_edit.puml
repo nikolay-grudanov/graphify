@@ -1,0 +1,113 @@
+@startuml Редактирование сроков
+
+
+autonumber
+title Редактирование сроков корпоративного запроса
+
+
+!include ../../../../../commons/skinparams.puml
+!include ../../../../../commons/legend.puml
+
+
+actor "Пользователь" as User order 10
+participant "CORPORATE-REQUESTS APP" as CR_APP order 20
+participant "CORPORATE-REQUESTS BE" as CR_BE order 30
+
+
+== Открытие модального окна Сроки ==
+
+
+User -> CR_APP : Открытие модального окна "Сроки"
+activate CR_APP
+note right
+    Данные:
+    - corporateRequestId
+    - requestStartDate (current period)
+    - requestEndDate (current period)
+end note
+
+
+CR_APP -> CR_BE : Получение информации о корпоративном запросе [[../../../corporate-requests-be/openapi/corporate-requests/getCorporateRequestInfo.puml getCorporateRequestInfo(CorporateRequestId)]]
+activate CR_BE
+CR_BE -> CR_APP : Ответ на запрос
+deactivate CR_BE
+
+
+CR_APP -> User : Отображение форм для выбора периодов
+note right
+    Поля для выбора:
+    - requestStartDate
+    - requestEndDate
+end note
+
+
+User -> CR_APP : Выбор периодов
+note right
+    Установка:
+    - requestStartDate
+    - requestEndDate
+end note
+
+
+CR_APP -> CR_APP : Подготовка данных для API
+note right
+    Формирование CorporateRequestUpdateRqDto:
+    - corporateRequestId
+    - requestStartDate
+    - requestEndDate
+end note
+
+
+== Сохранение изменений ==
+
+
+User -> CR_APP : Нажатие кнопки "Сохранить"
+CR_APP -> CR_BE : Обновление информации о корпоративном запросе [[../../../corporate-requests-be/openapi/corporate-requests/updateCorporateRequestInfo.puml updateCorporateRequestInfo(CorporateRequestId)]]
+activate CR_BE
+CR_BE -> CR_APP : Ответ на запрос
+deactivate CR_BE
+
+
+
+== Обновление данных в UI ==
+CR_APP -> CR_APP : [[ ../screen.puml Открытие экранной формы "Корпоративный запрос"]]
+CR_APP --> User : Карточка корпоративного запроса
+deactivate CR_APP
+
+
+== Закрытие модального окна ==
+
+
+CR_APP -> User : Модальное окно закрыто автоматически
+    deactivate CR_APP
+
+
+== Обработка ошибок ==
+
+
+alt Ошибка валидации данных (400)
+    CR_BE -> CR_APP : HTTP 400 Bad Request
+    CR_APP -> User : Отображение snackbar "Ошибка валидации данных"
+end
+
+
+alt Ошибка сервера (500)
+    CR_BE -> CR_APP : HTTP 500 Internal Server Error
+    CR_APP -> User : Отображение snackbar "Ошибка сервера"
+end
+
+
+alt Ошибка авторизации (401/403)
+    CR_BE -> CR_APP : HTTP 401/403 Forbidden
+    CR_APP -> User : Отображение сообщения "Отказано в доступе"
+end
+
+
+alt Error: CorporateRequestNotFound (404)
+    CR_BE -> CR_APP : HTTP 404 Not Found
+    CR_APP -> User : Отображение "Запрос не найден"
+end
+
+
+
+@enduml

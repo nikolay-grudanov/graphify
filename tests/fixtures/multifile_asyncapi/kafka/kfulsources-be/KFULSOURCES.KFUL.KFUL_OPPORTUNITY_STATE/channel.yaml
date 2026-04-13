@@ -1,0 +1,11 @@
+address: KFULSOURCES.KFUL.KFUL_OPPORTUNITY_STATE
+description: Информирование подписчиков об изменении состояния сделки PreTrade
+messages:
+  KfulOpportunityState:
+    name: KfulOpportunityState
+    title: Kful Opportunity State
+    contentType: application/json
+    headers:
+      $ref: ../../../models/KafkaHeaders.yaml#/components/schemas/KafkaHeaders
+    payload:
+      $ref: ./models/KfulOpportunityStateDto.yaml#/components/schemas/KfulOpportunityStateDto
