@@ -1,0 +1,1113 @@
+<http://www.w3.org/1999/02/22-rdf-syntax-ns#value> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://www.w3.org/1999/02/22-rdf-syntax-ns#value> <http://www.w3.org/2000/01/rdf-schema#label> "value" .
+
+<http://www.w3.org/1999/02/22-rdf-syntax-ns#value> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Path> .
+
+<http://www.w3.org/1999/02/22-rdf-syntax-ns#value> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://www.w3.org/1999/02/22-rdf-syntax-ns#value> <http://spec.openapis.org/oas/ontology#hasSearchKey> "value" .
+
+<http://spec.openapis.org/oas/ontology#xUi> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#xUi> <http://www.w3.org/2000/01/rdf-schema#label> "x-ui" .
+
+<http://spec.openapis.org/oas/ontology#xUi> <http://www.w3.org/2000/01/rdf-schema#label> "x ui" .
+
+<http://spec.openapis.org/oas/ontology#xUi> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#xUi> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#xUi> <http://spec.openapis.org/oas/ontology#hasSearchKey> "xui" .
+
+<http://spec.openapis.org/oas/ontology#xSubFormat> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#xSubFormat> <http://www.w3.org/2000/01/rdf-schema#label> "x-sub-format" .
+
+<http://spec.openapis.org/oas/ontology#xSubFormat> <http://www.w3.org/2000/01/rdf-schema#label> "x sub format" .
+
+<http://spec.openapis.org/oas/ontology#xSubFormat> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#xSubFormat> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#xSubFormat> <http://spec.openapis.org/oas/ontology#hasSearchKey> "xsubformat" .
+
+<http://spec.openapis.org/oas/ontology#xQuery> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#xQuery> <http://www.w3.org/2000/01/rdf-schema#label> "x-query" .
+
+<http://spec.openapis.org/oas/ontology#xQuery> <http://www.w3.org/2000/01/rdf-schema#label> "x query" .
+
+<http://spec.openapis.org/oas/ontology#xQuery> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#xQuery> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#xQuery> <http://spec.openapis.org/oas/ontology#hasSearchKey> "xquery" .
+
+<http://spec.openapis.org/oas/ontology#xEmployeesBe> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#xEmployeesBe> <http://www.w3.org/2000/01/rdf-schema#label> "x-employees-be" .
+
+<http://spec.openapis.org/oas/ontology#xEmployeesBe> <http://www.w3.org/2000/01/rdf-schema#label> "x employees be" .
+
+<http://spec.openapis.org/oas/ontology#xEmployeesBe> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#xEmployeesBe> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#xEmployeesBe> <http://spec.openapis.org/oas/ontology#hasSearchKey> "xemployeesbe" .
+
+<http://spec.openapis.org/oas/ontology#xDmbMappingRule> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#xDmbMappingRule> <http://www.w3.org/2000/01/rdf-schema#label> "x-dmb-mapping-rule" .
+
+<http://spec.openapis.org/oas/ontology#xDmbMappingRule> <http://www.w3.org/2000/01/rdf-schema#label> "x dmb mapping rule" .
+
+<http://spec.openapis.org/oas/ontology#xDmbMappingRule> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#xDmbMappingRule> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#xDmbMappingRule> <http://spec.openapis.org/oas/ontology#hasSearchKey> "xdmbmappingrule" .
+
+<http://spec.openapis.org/oas/ontology#xDbFilter> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#xDbFilter> <http://www.w3.org/2000/01/rdf-schema#label> "x-db-filter" .
+
+<http://spec.openapis.org/oas/ontology#xDbFilter> <http://www.w3.org/2000/01/rdf-schema#label> "x db filter" .
+
+<http://spec.openapis.org/oas/ontology#xDbFilter> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#xDbFilter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#xDbFilter> <http://spec.openapis.org/oas/ontology#hasSearchKey> "xdbfilter" .
+
+<http://spec.openapis.org/oas/ontology#xDb> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#xDb> <http://www.w3.org/2000/01/rdf-schema#label> "x-db" .
+
+<http://spec.openapis.org/oas/ontology#xDb> <http://www.w3.org/2000/01/rdf-schema#label> "x db" .
+
+<http://spec.openapis.org/oas/ontology#xDb> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#xDb> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#xDb> <http://spec.openapis.org/oas/ontology#hasSearchKey> "xdb" .
+
+<http://spec.openapis.org/oas/ontology#xClientsBe> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#xClientsBe> <http://www.w3.org/2000/01/rdf-schema#label> "x-clients-be" .
+
+<http://spec.openapis.org/oas/ontology#xClientsBe> <http://www.w3.org/2000/01/rdf-schema#label> "x clients be" .
+
+<http://spec.openapis.org/oas/ontology#xClientsBe> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#xClientsBe> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#xClientsBe> <http://spec.openapis.org/oas/ontology#hasSearchKey> "xclientsbe" .
+
+<http://spec.openapis.org/oas/ontology#worksOnChannel> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#KafkaChannel> .
+
+<http://spec.openapis.org/oas/ontology#worksOnChannel> <http://www.w3.org/2000/01/rdf-schema#label> "works on channel" .
+
+<http://spec.openapis.org/oas/ontology#worksOnChannel> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#KafkaOperation> .
+
+<http://spec.openapis.org/oas/ontology#worksOnChannel> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#worksOnChannel> <http://spec.openapis.org/oas/ontology#hasSearchKey> "worksonchannel" .
+
+<http://spec.openapis.org/oas/ontology#useMessage> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#AsyncMessage> .
+
+<http://spec.openapis.org/oas/ontology#useMessage> <http://www.w3.org/2000/01/rdf-schema#label> "use message" .
+
+<http://spec.openapis.org/oas/ontology#useMessage> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#KafkaOperation> .
+
+<http://spec.openapis.org/oas/ontology#useMessage> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#WsOperation> .
+
+<http://spec.openapis.org/oas/ontology#useMessage> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#useMessage> <http://spec.openapis.org/oas/ontology#hasSearchKey> "usemessage" .
+
+<http://spec.openapis.org/oas/ontology#uniqueitems> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#uniqueitems> <http://www.w3.org/2000/01/rdf-schema#label> "unique items" .
+
+<http://spec.openapis.org/oas/ontology#uniqueitems> <http://www.w3.org/2000/01/rdf-schema#label> "uniqueitems" .
+
+<http://spec.openapis.org/oas/ontology#uniqueitems> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#uniqueitems> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#uniqueitems> <http://spec.openapis.org/oas/ontology#hasSearchKey> "uniqueitems" .
+
+<http://spec.openapis.org/oas/ontology#title> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#title> <http://www.w3.org/2000/01/rdf-schema#label> "title" .
+
+<http://spec.openapis.org/oas/ontology#title> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#title> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#title> <http://spec.openapis.org/oas/ontology#hasSearchKey> "title" .
+
+<http://spec.openapis.org/oas/ontology#tag> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Tag> .
+
+<http://spec.openapis.org/oas/ontology#tag> <http://www.w3.org/2000/01/rdf-schema#label> "tag" .
+
+<http://spec.openapis.org/oas/ontology#tag> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#tag> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#tag> <http://spec.openapis.org/oas/ontology#hasSearchKey> "tag" .
+
+<http://spec.openapis.org/oas/ontology#supportedOperation> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#supportedOperation> <http://www.w3.org/2000/01/rdf-schema#label> "supported operation" .
+
+<http://spec.openapis.org/oas/ontology#supportedOperation> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Service> .
+
+<http://spec.openapis.org/oas/ontology#supportedOperation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#supportedOperation> <http://spec.openapis.org/oas/ontology#hasSearchKey> "supportedoperation" .
+
+<http://spec.openapis.org/oas/ontology#supportedAsyncOperation> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#KafkaOperation> .
+
+<http://spec.openapis.org/oas/ontology#supportedAsyncOperation> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#WsOperation> .
+
+<http://spec.openapis.org/oas/ontology#supportedAsyncOperation> <http://www.w3.org/2000/01/rdf-schema#label> "supported async operation" .
+
+<http://spec.openapis.org/oas/ontology#supportedAsyncOperation> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Service> .
+
+<http://spec.openapis.org/oas/ontology#supportedAsyncOperation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#supportedAsyncOperation> <http://spec.openapis.org/oas/ontology#hasSearchKey> "supportedasyncoperation" .
+
+<http://spec.openapis.org/oas/ontology#supportMessage> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#AsyncMessage> .
+
+<http://spec.openapis.org/oas/ontology#supportMessage> <http://www.w3.org/2000/01/rdf-schema#label> "support message" .
+
+<http://spec.openapis.org/oas/ontology#supportMessage> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#KafkaChannel> .
+
+<http://spec.openapis.org/oas/ontology#supportMessage> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#WsChannel> .
+
+<http://spec.openapis.org/oas/ontology#supportMessage> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#supportMessage> <http://spec.openapis.org/oas/ontology#hasSearchKey> "supportmessage" .
+
+<http://spec.openapis.org/oas/ontology#statusCode> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://spec.openapis.org/oas/ontology#statusCode> <http://www.w3.org/2000/01/rdf-schema#label> "status code" .
+
+<http://spec.openapis.org/oas/ontology#statusCode> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Response> .
+
+<http://spec.openapis.org/oas/ontology#statusCode> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#statusCode> <http://spec.openapis.org/oas/ontology#hasSearchKey> "statuscode" .
+
+<http://spec.openapis.org/oas/ontology#sendToAudit> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#sendToAudit> <http://www.w3.org/2000/01/rdf-schema#label> "send to audit" .
+
+<http://spec.openapis.org/oas/ontology#sendToAudit> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#sendToAudit> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#sendToAudit> <http://spec.openapis.org/oas/ontology#hasSearchKey> "sendtoaudit" .
+
+<http://spec.openapis.org/oas/ontology#schema> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#schema> <http://www.w3.org/2000/01/rdf-schema#label> "schema" .
+
+<http://spec.openapis.org/oas/ontology#schema> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#QueryParameter> .
+
+<http://spec.openapis.org/oas/ontology#schema> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#RequestBody> .
+
+<http://spec.openapis.org/oas/ontology#schema> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Response> .
+
+<http://spec.openapis.org/oas/ontology#schema> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#PathParameter> .
+
+<http://spec.openapis.org/oas/ontology#schema> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#schema> <http://spec.openapis.org/oas/ontology#hasSearchKey> "schema" .
+
+<http://spec.openapis.org/oas/ontology#responsibleFor> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Document> .
+
+<http://spec.openapis.org/oas/ontology#responsibleFor> <http://www.w3.org/2000/01/rdf-schema#label> "responsible for" .
+
+<http://spec.openapis.org/oas/ontology#responsibleFor> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Person> .
+
+<http://spec.openapis.org/oas/ontology#responsibleFor> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#responsibleFor> <http://spec.openapis.org/oas/ontology#hasSearchKey> "responsiblefor" .
+
+<http://spec.openapis.org/oas/ontology#response> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Response> .
+
+<http://spec.openapis.org/oas/ontology#response> <http://www.w3.org/2000/01/rdf-schema#label> "response" .
+
+<http://spec.openapis.org/oas/ontology#response> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#response> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#response> <http://spec.openapis.org/oas/ontology#hasSearchKey> "response" .
+
+<http://spec.openapis.org/oas/ontology#requiredProps> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#requiredProps> <http://www.w3.org/2000/01/rdf-schema#label> "required props" .
+
+<http://spec.openapis.org/oas/ontology#requiredProps> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#requiredProps> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#requiredProps> <http://spec.openapis.org/oas/ontology#hasSearchKey> "requiredprops" .
+
+<http://spec.openapis.org/oas/ontology#required> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#required> <http://www.w3.org/2000/01/rdf-schema#label> "required" .
+
+<http://spec.openapis.org/oas/ontology#required> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#QueryParameter> .
+
+<http://spec.openapis.org/oas/ontology#required> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#PathParameter> .
+
+<http://spec.openapis.org/oas/ontology#required> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#required> <http://spec.openapis.org/oas/ontology#hasSearchKey> "required" .
+
+<http://spec.openapis.org/oas/ontology#requirePermission> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Permission> .
+
+<http://spec.openapis.org/oas/ontology#requirePermission> <http://www.w3.org/2000/01/rdf-schema#label> "require permission" .
+
+<http://spec.openapis.org/oas/ontology#requirePermission> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#requirePermission> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#requirePermission> <http://spec.openapis.org/oas/ontology#hasSearchKey> "requirepermission" .
+
+<http://spec.openapis.org/oas/ontology#requestBody> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#RequestBody> .
+
+<http://spec.openapis.org/oas/ontology#requestBody> <http://www.w3.org/2000/01/rdf-schema#label> "request body" .
+
+<http://spec.openapis.org/oas/ontology#requestBody> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#requestBody> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#requestBody> <http://spec.openapis.org/oas/ontology#hasSearchKey> "requestbody" .
+
+<http://spec.openapis.org/oas/ontology#representedInDocument> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Document> .
+
+<http://spec.openapis.org/oas/ontology#representedInDocument> <http://www.w3.org/2000/01/rdf-schema#label> "represented in document" .
+
+<http://spec.openapis.org/oas/ontology#representedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Service> .
+
+<http://spec.openapis.org/oas/ontology#representedInDocument> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#representedInDocument> <http://spec.openapis.org/oas/ontology#hasSearchKey> "representedindocument" .
+
+<http://spec.openapis.org/oas/ontology#referencedTable> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#DbTable> .
+
+<http://spec.openapis.org/oas/ontology#referencedTable> <http://www.w3.org/2000/01/rdf-schema#label> "referenced table" .
+
+<http://spec.openapis.org/oas/ontology#referencedTable> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbRefAttribute> .
+
+<http://spec.openapis.org/oas/ontology#referencedTable> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#referencedTable> <http://spec.openapis.org/oas/ontology#hasSearchKey> "referencedtable" .
+
+<http://spec.openapis.org/oas/ontology#referencedField> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#DbField> .
+
+<http://spec.openapis.org/oas/ontology#referencedField> <http://www.w3.org/2000/01/rdf-schema#label> "referenced field" .
+
+<http://spec.openapis.org/oas/ontology#referencedField> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbRefAttribute> .
+
+<http://spec.openapis.org/oas/ontology#referencedField> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#referencedField> <http://spec.openapis.org/oas/ontology#hasSearchKey> "referencedfield" .
+
+<http://spec.openapis.org/oas/ontology#pattern> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#pattern> <http://www.w3.org/2000/01/rdf-schema#label> "pattern" .
+
+<http://spec.openapis.org/oas/ontology#pattern> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#pattern> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#pattern> <http://spec.openapis.org/oas/ontology#hasSearchKey> "pattern" .
+
+<http://spec.openapis.org/oas/ontology#parameter> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#QueryParameter> .
+
+<http://spec.openapis.org/oas/ontology#parameter> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#PathParameter> .
+
+<http://spec.openapis.org/oas/ontology#parameter> <http://www.w3.org/2000/01/rdf-schema#label> "parameter" .
+
+<http://spec.openapis.org/oas/ontology#parameter> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#parameter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#parameter> <http://spec.openapis.org/oas/ontology#hasSearchKey> "parameter" .
+
+<http://spec.openapis.org/oas/ontology#oneof> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#anyType> .
+
+<http://spec.openapis.org/oas/ontology#oneof> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#oneof> <http://www.w3.org/2000/01/rdf-schema#label> "one of" .
+
+<http://spec.openapis.org/oas/ontology#oneof> <http://www.w3.org/2000/01/rdf-schema#label> "oneof" .
+
+<http://spec.openapis.org/oas/ontology#oneof> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#oneof> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#oneof> <http://spec.openapis.org/oas/ontology#hasSearchKey> "oneof" .
+
+<http://spec.openapis.org/oas/ontology#onPath> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Path> .
+
+<http://spec.openapis.org/oas/ontology#onPath> <http://www.w3.org/2000/01/rdf-schema#label> "on path" .
+
+<http://spec.openapis.org/oas/ontology#onPath> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#onPath> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#onPath> <http://spec.openapis.org/oas/ontology#hasSearchKey> "onpath" .
+
+<http://spec.openapis.org/oas/ontology#nullable> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#nullable> <http://www.w3.org/2000/01/rdf-schema#label> "nullable" .
+
+<http://spec.openapis.org/oas/ontology#nullable> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#nullable> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#nullable> <http://spec.openapis.org/oas/ontology#hasSearchKey> "nullable" .
+
+<http://spec.openapis.org/oas/ontology#minlength> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://spec.openapis.org/oas/ontology#minlength> <http://www.w3.org/2000/01/rdf-schema#label> "min length" .
+
+<http://spec.openapis.org/oas/ontology#minlength> <http://www.w3.org/2000/01/rdf-schema#label> "minlength" .
+
+<http://spec.openapis.org/oas/ontology#minlength> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#minlength> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#minlength> <http://spec.openapis.org/oas/ontology#hasSearchKey> "minlength" .
+
+<http://spec.openapis.org/oas/ontology#minitems> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://spec.openapis.org/oas/ontology#minitems> <http://www.w3.org/2000/01/rdf-schema#label> "min items" .
+
+<http://spec.openapis.org/oas/ontology#minitems> <http://www.w3.org/2000/01/rdf-schema#label> "minitems" .
+
+<http://spec.openapis.org/oas/ontology#minitems> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#minitems> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#minitems> <http://spec.openapis.org/oas/ontology#hasSearchKey> "minitems" .
+
+<http://spec.openapis.org/oas/ontology#minimum> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://spec.openapis.org/oas/ontology#minimum> <http://www.w3.org/2000/01/rdf-schema#label> "minimum" .
+
+<http://spec.openapis.org/oas/ontology#minimum> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#minimum> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#minimum> <http://spec.openapis.org/oas/ontology#hasSearchKey> "minimum" .
+
+<http://spec.openapis.org/oas/ontology#method> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Method> .
+
+<http://spec.openapis.org/oas/ontology#method> <http://www.w3.org/2000/01/rdf-schema#label> "method" .
+
+<http://spec.openapis.org/oas/ontology#method> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#method> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#method> <http://spec.openapis.org/oas/ontology#hasSearchKey> "method" .
+
+<http://spec.openapis.org/oas/ontology#mentionedInDocument> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Document> .
+
+<http://spec.openapis.org/oas/ontology#mentionedInDocument> <http://www.w3.org/2000/01/rdf-schema#label> "mentioned in document" .
+
+<http://spec.openapis.org/oas/ontology#mentionedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#mentionedInDocument> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#mentionedInDocument> <http://spec.openapis.org/oas/ontology#isMeta> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#mentionedInDocument> <http://spec.openapis.org/oas/ontology#hasSearchKey> "mentionedindocument" .
+
+<http://spec.openapis.org/oas/ontology#maxlength> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://spec.openapis.org/oas/ontology#maxlength> <http://www.w3.org/2000/01/rdf-schema#label> "max length" .
+
+<http://spec.openapis.org/oas/ontology#maxlength> <http://www.w3.org/2000/01/rdf-schema#label> "maxlength" .
+
+<http://spec.openapis.org/oas/ontology#maxlength> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#maxlength> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#maxlength> <http://spec.openapis.org/oas/ontology#hasSearchKey> "maxlength" .
+
+<http://spec.openapis.org/oas/ontology#maxitems> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://spec.openapis.org/oas/ontology#maxitems> <http://www.w3.org/2000/01/rdf-schema#label> "max items" .
+
+<http://spec.openapis.org/oas/ontology#maxitems> <http://www.w3.org/2000/01/rdf-schema#label> "maxitems" .
+
+<http://spec.openapis.org/oas/ontology#maxitems> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#maxitems> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#maxitems> <http://spec.openapis.org/oas/ontology#hasSearchKey> "maxitems" .
+
+<http://spec.openapis.org/oas/ontology#maximum> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#integer> .
+
+<http://spec.openapis.org/oas/ontology#maximum> <http://www.w3.org/2000/01/rdf-schema#label> "maximum" .
+
+<http://spec.openapis.org/oas/ontology#maximum> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#maximum> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#maximum> <http://spec.openapis.org/oas/ontology#hasSearchKey> "maximum" .
+
+<http://spec.openapis.org/oas/ontology#items> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#anyType> .
+
+<http://spec.openapis.org/oas/ontology#items> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#items> <http://www.w3.org/2000/01/rdf-schema#label> "items" .
+
+<http://spec.openapis.org/oas/ontology#items> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#items> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#items> <http://spec.openapis.org/oas/ontology#hasSearchKey> "items" .
+
+<http://spec.openapis.org/oas/ontology#isUnique> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#isUnique> <http://www.w3.org/2000/01/rdf-schema#label> "is unique" .
+
+<http://spec.openapis.org/oas/ontology#isUnique> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbIndex> .
+
+<http://spec.openapis.org/oas/ontology#isUnique> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbField> .
+
+<http://spec.openapis.org/oas/ontology#isUnique> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#isUnique> <http://spec.openapis.org/oas/ontology#hasSearchKey> "isunique" .
+
+<http://spec.openapis.org/oas/ontology#isPrimaryKey> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#isPrimaryKey> <http://www.w3.org/2000/01/rdf-schema#label> "is primary key" .
+
+<http://spec.openapis.org/oas/ontology#isPrimaryKey> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbIndex> .
+
+<http://spec.openapis.org/oas/ontology#isPrimaryKey> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbField> .
+
+<http://spec.openapis.org/oas/ontology#isPrimaryKey> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#isPrimaryKey> <http://spec.openapis.org/oas/ontology#hasSearchKey> "isprimarykey" .
+
+<http://spec.openapis.org/oas/ontology#isNotNull> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#isNotNull> <http://www.w3.org/2000/01/rdf-schema#label> "is not null" .
+
+<http://spec.openapis.org/oas/ontology#isNotNull> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbField> .
+
+<http://spec.openapis.org/oas/ontology#isNotNull> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#isNotNull> <http://spec.openapis.org/oas/ontology#hasSearchKey> "isnotnull" .
+
+<http://spec.openapis.org/oas/ontology#isMeta> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#isMeta> <http://www.w3.org/2000/01/rdf-schema#label> "is Meta" .
+
+<http://spec.openapis.org/oas/ontology#isMeta> <http://www.w3.org/2000/01/rdf-schema#domain> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#isMeta> <http://www.w3.org/2000/01/rdf-schema#domain> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#isMeta> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#isMeta> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Description> "Классы и проперти, имеющие данный параметр, описывают то, как хранится или используется элемент онтологии, но не являются частью онтологии."@ru .
+
+<http://spec.openapis.org/oas/ontology#isMeta> <http://spec.openapis.org/oas/ontology#hasSearchKey> "ismeta" .
+
+<http://spec.openapis.org/oas/ontology#includesField> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#DbField> .
+
+<http://spec.openapis.org/oas/ontology#includesField> <http://www.w3.org/2000/01/rdf-schema#label> "includes field" .
+
+<http://spec.openapis.org/oas/ontology#includesField> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbIndex> .
+
+<http://spec.openapis.org/oas/ontology#includesField> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#includesField> <http://spec.openapis.org/oas/ontology#hasSearchKey> "includesfield" .
+
+<http://spec.openapis.org/oas/ontology#hasVersion> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasVersion> <http://www.w3.org/2000/01/rdf-schema#label> "has version" .
+
+<http://spec.openapis.org/oas/ontology#hasVersion> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Document> .
+
+<http://spec.openapis.org/oas/ontology#hasVersion> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasVersion> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasversion" .
+
+<http://spec.openapis.org/oas/ontology#hasUrl> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasUrl> <http://www.w3.org/2000/01/rdf-schema#label> "has url" .
+
+<http://spec.openapis.org/oas/ontology#hasUrl> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Person> .
+
+<http://spec.openapis.org/oas/ontology#hasUrl> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasUrl> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasurl" .
+
+<http://spec.openapis.org/oas/ontology#hasTypeName> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasTypeName> <http://www.w3.org/2000/01/rdf-schema#label> "has type name" .
+
+<http://spec.openapis.org/oas/ontology#hasTypeName> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbSchemaType> .
+
+<http://spec.openapis.org/oas/ontology#hasTypeName> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasTypeName> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hastypename" .
+
+<http://spec.openapis.org/oas/ontology#hasTypeMarker> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasTypeMarker> <http://www.w3.org/2000/01/rdf-schema#label> "has type marker" .
+
+<http://spec.openapis.org/oas/ontology#hasTypeMarker> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#hasTypeMarker> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasTypeMarker> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hastypemarker" .
+
+<http://spec.openapis.org/oas/ontology#hasType> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#DbSchemaType> .
+
+<http://spec.openapis.org/oas/ontology#hasType> <http://www.w3.org/2000/01/rdf-schema#label> "has type" .
+
+<http://spec.openapis.org/oas/ontology#hasType> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbField> .
+
+<http://spec.openapis.org/oas/ontology#hasType> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasType> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hastype" .
+
+<http://spec.openapis.org/oas/ontology#hasSearchKey> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasSearchKey> <http://www.w3.org/2000/01/rdf-schema#label> "has search key" .
+
+<http://spec.openapis.org/oas/ontology#hasSearchKey> <http://www.w3.org/2000/01/rdf-schema#domain> <http://www.w3.org/2001/XMLSchema#anyType> .
+
+<http://spec.openapis.org/oas/ontology#hasSearchKey> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasSearchKey> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Description> "Ключ поиска для упрощения поиска по сущностям."@ru .
+
+<http://spec.openapis.org/oas/ontology#hasSearchKey> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hassearchkey" .
+
+<http://spec.openapis.org/oas/ontology#hasProperty> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#hasProperty> <http://www.w3.org/2000/01/rdf-schema#label> "has property" .
+
+<http://spec.openapis.org/oas/ontology#hasProperty> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#hasProperty> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasProperty> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasproperty" .
+
+<http://spec.openapis.org/oas/ontology#hasPermissionItem> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Permission> .
+
+<http://spec.openapis.org/oas/ontology#hasPermissionItem> <http://www.w3.org/2000/01/rdf-schema#label> "has permission item" .
+
+<http://spec.openapis.org/oas/ontology#hasPermissionItem> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#PermissionGroup> .
+
+<http://spec.openapis.org/oas/ontology#hasPermissionItem> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Role> .
+
+<http://spec.openapis.org/oas/ontology#hasPermissionItem> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasPermissionItem> <http://spec.openapis.org/oas/ontology#hasSearchKey> "haspermissionitem" .
+
+<http://spec.openapis.org/oas/ontology#hasPayload> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#hasPayload> <http://www.w3.org/2000/01/rdf-schema#label> "has payload" .
+
+<http://spec.openapis.org/oas/ontology#hasPayload> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#AsyncMessage> .
+
+<http://spec.openapis.org/oas/ontology#hasPayload> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasPayload> <http://spec.openapis.org/oas/ontology#hasSearchKey> "haspayload" .
+
+<http://spec.openapis.org/oas/ontology#hasName> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasName> <http://www.w3.org/2000/01/rdf-schema#label> "has name" .
+
+<http://spec.openapis.org/oas/ontology#hasName> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Person> .
+
+<http://spec.openapis.org/oas/ontology#hasName> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasName> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasname" .
+
+<http://spec.openapis.org/oas/ontology#hasIndex> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#DbIndex> .
+
+<http://spec.openapis.org/oas/ontology#hasIndex> <http://www.w3.org/2000/01/rdf-schema#label> "has index" .
+
+<http://spec.openapis.org/oas/ontology#hasIndex> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbTable> .
+
+<http://spec.openapis.org/oas/ontology#hasIndex> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasIndex> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasindex" .
+
+<http://spec.openapis.org/oas/ontology#hasIdentifier> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasIdentifier> <http://www.w3.org/2000/01/rdf-schema#label> "has identifier" .
+
+<http://spec.openapis.org/oas/ontology#hasIdentifier> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbTable> .
+
+<http://spec.openapis.org/oas/ontology#hasIdentifier> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbField> .
+
+<http://spec.openapis.org/oas/ontology#hasIdentifier> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbIndex> .
+
+<http://spec.openapis.org/oas/ontology#hasIdentifier> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasIdentifier> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasidentifier" .
+
+<http://spec.openapis.org/oas/ontology#hasGroupItem> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#PermissionGroup> .
+
+<http://spec.openapis.org/oas/ontology#hasGroupItem> <http://www.w3.org/2000/01/rdf-schema#label> "has group item" .
+
+<http://spec.openapis.org/oas/ontology#hasGroupItem> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Role> .
+
+<http://spec.openapis.org/oas/ontology#hasGroupItem> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasGroupItem> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasgroupitem" .
+
+<http://spec.openapis.org/oas/ontology#hasField> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#DbField> .
+
+<http://spec.openapis.org/oas/ontology#hasField> <http://www.w3.org/2000/01/rdf-schema#label> "has field" .
+
+<http://spec.openapis.org/oas/ontology#hasField> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbTable> .
+
+<http://spec.openapis.org/oas/ontology#hasField> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasField> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasfield" .
+
+<http://spec.openapis.org/oas/ontology#hasExtension> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasExtension> <http://www.w3.org/2000/01/rdf-schema#label> "has extension" .
+
+<http://spec.openapis.org/oas/ontology#hasExtension> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Document> .
+
+<http://spec.openapis.org/oas/ontology#hasExtension> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasExtension> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasextension" .
+
+<http://spec.openapis.org/oas/ontology#hasExample> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasExample> <http://www.w3.org/2000/01/rdf-schema#label> "has example" .
+
+<http://spec.openapis.org/oas/ontology#hasExample> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#hasExample> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasExample> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasexample" .
+
+<http://spec.openapis.org/oas/ontology#hasEmail> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasEmail> <http://www.w3.org/2000/01/rdf-schema#label> "has email" .
+
+<http://spec.openapis.org/oas/ontology#hasEmail> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Person> .
+
+<http://spec.openapis.org/oas/ontology#hasEmail> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasEmail> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasemail" .
+
+<http://spec.openapis.org/oas/ontology#hasDirectoryPath> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasDirectoryPath> <http://www.w3.org/2000/01/rdf-schema#label> "has directory path" .
+
+<http://spec.openapis.org/oas/ontology#hasDirectoryPath> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Service> .
+
+<http://spec.openapis.org/oas/ontology#hasDirectoryPath> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Document> .
+
+<http://spec.openapis.org/oas/ontology#hasDirectoryPath> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasDirectoryPath> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasdirectorypath" .
+
+<http://spec.openapis.org/oas/ontology#hasDimension> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasDimension> <http://www.w3.org/2000/01/rdf-schema#label> "has dimension" .
+
+<http://spec.openapis.org/oas/ontology#hasDimension> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbRefAttribute> .
+
+<http://spec.openapis.org/oas/ontology#hasDimension> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasDimension> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasdimension" .
+
+<http://spec.openapis.org/oas/ontology#hasCode> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasCode> <http://www.w3.org/2000/01/rdf-schema#label> "has code" .
+
+<http://spec.openapis.org/oas/ontology#hasCode> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Permission> .
+
+<http://spec.openapis.org/oas/ontology#hasCode> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#PermissionGroup> .
+
+<http://spec.openapis.org/oas/ontology#hasCode> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Role> .
+
+<http://spec.openapis.org/oas/ontology#hasCode> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasCode> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hascode" .
+
+<http://spec.openapis.org/oas/ontology#hasAttributeTo> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#DbRefAttribute> .
+
+<http://spec.openapis.org/oas/ontology#hasAttributeTo> <http://www.w3.org/2000/01/rdf-schema#label> "has attribute to" .
+
+<http://spec.openapis.org/oas/ontology#hasAttributeTo> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbReference> .
+
+<http://spec.openapis.org/oas/ontology#hasAttributeTo> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasAttributeTo> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasattributeto" .
+
+<http://spec.openapis.org/oas/ontology#hasAttributeFrom> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#DbRefAttribute> .
+
+<http://spec.openapis.org/oas/ontology#hasAttributeFrom> <http://www.w3.org/2000/01/rdf-schema#label> "has attribute from" .
+
+<http://spec.openapis.org/oas/ontology#hasAttributeFrom> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbReference> .
+
+<http://spec.openapis.org/oas/ontology#hasAttributeFrom> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasAttributeFrom> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasattributefrom" .
+
+<http://spec.openapis.org/oas/ontology#hasArgs> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasArgs> <http://www.w3.org/2000/01/rdf-schema#label> "has args" .
+
+<http://spec.openapis.org/oas/ontology#hasArgs> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbSchemaType> .
+
+<http://spec.openapis.org/oas/ontology#hasArgs> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasArgs> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasargs" .
+
+<http://spec.openapis.org/oas/ontology#hasAddress> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasAddress> <http://www.w3.org/2000/01/rdf-schema#label> "has address" .
+
+<http://spec.openapis.org/oas/ontology#hasAddress> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#KafkaChannel> .
+
+<http://spec.openapis.org/oas/ontology#hasAddress> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#WsChannel> .
+
+<http://spec.openapis.org/oas/ontology#hasAddress> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasAddress> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasaddress" .
+
+<http://spec.openapis.org/oas/ontology#hasActionType> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#hasActionType> <http://www.w3.org/2000/01/rdf-schema#label> "has action type" .
+
+<http://spec.openapis.org/oas/ontology#hasActionType> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#KafkaOperation> .
+
+<http://spec.openapis.org/oas/ontology#hasActionType> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#WsOperation> .
+
+<http://spec.openapis.org/oas/ontology#hasActionType> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#hasActionType> <http://spec.openapis.org/oas/ontology#hasSearchKey> "hasactiontype" .
+
+<http://spec.openapis.org/oas/ontology#format> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#format> <http://www.w3.org/2000/01/rdf-schema#label> "format" .
+
+<http://spec.openapis.org/oas/ontology#format> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#format> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#format> <http://spec.openapis.org/oas/ontology#hasSearchKey> "format" .
+
+<http://spec.openapis.org/oas/ontology#deprecated> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#deprecated> <http://www.w3.org/2000/01/rdf-schema#label> "deprecated" .
+
+<http://spec.openapis.org/oas/ontology#deprecated> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#deprecated> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#deprecated> <http://spec.openapis.org/oas/ontology#hasSearchKey> "deprecated" .
+
+<http://spec.openapis.org/oas/ontology#definesChannel> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#KafkaChannel> .
+
+<http://spec.openapis.org/oas/ontology#definesChannel> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#WsChannel> .
+
+<http://spec.openapis.org/oas/ontology#definesChannel> <http://www.w3.org/2000/01/rdf-schema#label> "defines channel" .
+
+<http://spec.openapis.org/oas/ontology#definesChannel> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Service> .
+
+<http://spec.openapis.org/oas/ontology#definesChannel> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#definesChannel> <http://spec.openapis.org/oas/ontology#hasSearchKey> "defineschannel" .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Document> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#label> "defined in document" .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Document> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Person> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#KafkaChannel> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#AsyncMessage> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#KafkaOperation> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#WsChannel> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#WsOperation> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbTable> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbField> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbSchemaType> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbReference> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbRefAttribute> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#DbIndex> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Path> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Method> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Permission> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#QueryParameter> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#RequestBody> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Response> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#PathParameter> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Tag> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#PermissionGroup> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Role> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://spec.openapis.org/oas/ontology#isMeta> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#definedInDocument> <http://spec.openapis.org/oas/ontology#hasSearchKey> "definedindocument" .
+
+<http://spec.openapis.org/oas/ontology#contentType> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#contentType> <http://www.w3.org/2000/01/rdf-schema#label> "content type" .
+
+<http://spec.openapis.org/oas/ontology#contentType> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#AsyncMessage> .
+
+<http://spec.openapis.org/oas/ontology#contentType> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#RequestBody> .
+
+<http://spec.openapis.org/oas/ontology#contentType> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Response> .
+
+<http://spec.openapis.org/oas/ontology#contentType> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#contentType> <http://spec.openapis.org/oas/ontology#hasSearchKey> "contenttype" .
+
+<http://spec.openapis.org/oas/ontology#allowedForSigma> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://spec.openapis.org/oas/ontology#allowedForSigma> <http://www.w3.org/2000/01/rdf-schema#label> "allowed for sigma" .
+
+<http://spec.openapis.org/oas/ontology#allowedForSigma> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Operation> .
+
+<http://spec.openapis.org/oas/ontology#allowedForSigma> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#allowedForSigma> <http://spec.openapis.org/oas/ontology#hasSearchKey> "allowedforsigma" .
+
+<http://spec.openapis.org/oas/ontology#allof> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#anyType> .
+
+<http://spec.openapis.org/oas/ontology#allof> <http://www.w3.org/2000/01/rdf-schema#range> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#allof> <http://www.w3.org/2000/01/rdf-schema#label> "all of" .
+
+<http://spec.openapis.org/oas/ontology#allof> <http://www.w3.org/2000/01/rdf-schema#label> "allof" .
+
+<http://spec.openapis.org/oas/ontology#allof> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#allof> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#allof> <http://spec.openapis.org/oas/ontology#hasSearchKey> "allof" .
+
+<http://spec.openapis.org/oas/ontology#_ref> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#string> .
+
+<http://spec.openapis.org/oas/ontology#_ref> <http://www.w3.org/2000/01/rdf-schema#label> "$ref" .
+
+<http://spec.openapis.org/oas/ontology#_ref> <http://www.w3.org/2000/01/rdf-schema#label> "_ref" .
+
+<http://spec.openapis.org/oas/ontology#_ref> <http://www.w3.org/2000/01/rdf-schema#domain> <http://spec.openapis.org/oas/ontology#Schema> .
+
+<http://spec.openapis.org/oas/ontology#_ref> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+
+<http://spec.openapis.org/oas/ontology#_ref> <http://spec.openapis.org/oas/ontology#hasSearchKey> "ref" .
+
+<http://spec.openapis.org/oas/ontology#WsOperation> <http://www.w3.org/2000/01/rdf-schema#label> "ws operation" .
+
+<http://spec.openapis.org/oas/ontology#WsOperation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#WsOperation> <http://spec.openapis.org/oas/ontology#hasSearchKey> "wsoperation" .
+
+<http://spec.openapis.org/oas/ontology#WsChannel> <http://www.w3.org/2000/01/rdf-schema#label> "ws channel" .
+
+<http://spec.openapis.org/oas/ontology#WsChannel> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#WsChannel> <http://spec.openapis.org/oas/ontology#hasSearchKey> "wschannel" .
+
+<http://spec.openapis.org/oas/ontology#Tag> <http://www.w3.org/2000/01/rdf-schema#label> "tag" .
+
+<http://spec.openapis.org/oas/ontology#Tag> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Tag> <http://spec.openapis.org/oas/ontology#hasSearchKey> "tag" .
+
+<http://spec.openapis.org/oas/ontology#Service> <http://www.w3.org/2000/01/rdf-schema#label> "service" .
+
+<http://spec.openapis.org/oas/ontology#Service> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Service> <http://spec.openapis.org/oas/ontology#hasSearchKey> "service" .
+
+<http://spec.openapis.org/oas/ontology#Schema> <http://www.w3.org/2000/01/rdf-schema#label> "schema" .
+
+<http://spec.openapis.org/oas/ontology#Schema> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Schema> <http://spec.openapis.org/oas/ontology#hasSearchKey> "schema" .
+
+<http://spec.openapis.org/oas/ontology#Role> <http://www.w3.org/2000/01/rdf-schema#label> "role" .
+
+<http://spec.openapis.org/oas/ontology#Role> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Role> <http://spec.openapis.org/oas/ontology#hasSearchKey> "role" .
+
+<http://spec.openapis.org/oas/ontology#Response> <http://www.w3.org/2000/01/rdf-schema#label> "response" .
+
+<http://spec.openapis.org/oas/ontology#Response> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Response> <http://spec.openapis.org/oas/ontology#hasSearchKey> "response" .
+
+<http://spec.openapis.org/oas/ontology#RequestBody> <http://www.w3.org/2000/01/rdf-schema#label> "request body" .
+
+<http://spec.openapis.org/oas/ontology#RequestBody> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#RequestBody> <http://spec.openapis.org/oas/ontology#hasSearchKey> "requestbody" .
+
+<http://spec.openapis.org/oas/ontology#QueryParameter> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://spec.openapis.org/oas/ontology#Parameter> .
+
+<http://spec.openapis.org/oas/ontology#QueryParameter> <http://www.w3.org/2000/01/rdf-schema#label> "query parameter" .
+
+<http://spec.openapis.org/oas/ontology#QueryParameter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#QueryParameter> <http://spec.openapis.org/oas/ontology#hasSearchKey> "queryparameter" .
+
+<http://spec.openapis.org/oas/ontology#Person> <http://www.w3.org/2000/01/rdf-schema#label> "person" .
+
+<http://spec.openapis.org/oas/ontology#Person> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Person> <http://spec.openapis.org/oas/ontology#hasSearchKey> "person" .
+
+<http://spec.openapis.org/oas/ontology#PermissionGroup> <http://www.w3.org/2000/01/rdf-schema#label> "permission group" .
+
+<http://spec.openapis.org/oas/ontology#PermissionGroup> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#PermissionGroup> <http://spec.openapis.org/oas/ontology#hasSearchKey> "permissiongroup" .
+
+<http://spec.openapis.org/oas/ontology#Permission> <http://www.w3.org/2000/01/rdf-schema#label> "permission" .
+
+<http://spec.openapis.org/oas/ontology#Permission> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Permission> <http://spec.openapis.org/oas/ontology#hasSearchKey> "permission" .
+
+<http://spec.openapis.org/oas/ontology#PathParameter> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://spec.openapis.org/oas/ontology#Parameter> .
+
+<http://spec.openapis.org/oas/ontology#PathParameter> <http://www.w3.org/2000/01/rdf-schema#label> "path parameter" .
+
+<http://spec.openapis.org/oas/ontology#PathParameter> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#PathParameter> <http://spec.openapis.org/oas/ontology#hasSearchKey> "pathparameter" .
+
+<http://spec.openapis.org/oas/ontology#Path> <http://www.w3.org/2000/01/rdf-schema#label> "path" .
+
+<http://spec.openapis.org/oas/ontology#Path> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Path> <http://spec.openapis.org/oas/ontology#hasSearchKey> "path" .
+
+<http://spec.openapis.org/oas/ontology#Operation> <http://www.w3.org/2000/01/rdf-schema#label> "operation" .
+
+<http://spec.openapis.org/oas/ontology#Operation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Operation> <http://spec.openapis.org/oas/ontology#hasSearchKey> "operation" .
+
+<http://spec.openapis.org/oas/ontology#Ontology> <http://www.w3.org/2000/01/rdf-schema#label> "OpenAPI Ontology для dmb"@ru .
+
+<http://spec.openapis.org/oas/ontology#Ontology> <http://www.w3.org/2000/01/rdf-schema#comment> "Онтология для представления openapi спецификации в ttl."@ru .
+
+<http://spec.openapis.org/oas/ontology#Ontology> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
+
+<http://spec.openapis.org/oas/ontology#Method> <http://www.w3.org/2000/01/rdf-schema#label> "method" .
+
+<http://spec.openapis.org/oas/ontology#Method> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Method> <http://spec.openapis.org/oas/ontology#hasSearchKey> "method" .
+
+<http://spec.openapis.org/oas/ontology#KafkaOperation> <http://www.w3.org/2000/01/rdf-schema#label> "kafka operation" .
+
+<http://spec.openapis.org/oas/ontology#KafkaOperation> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#KafkaOperation> <http://spec.openapis.org/oas/ontology#hasSearchKey> "kafkaoperation" .
+
+<http://spec.openapis.org/oas/ontology#KafkaChannel> <http://www.w3.org/2000/01/rdf-schema#label> "kafka channel" .
+
+<http://spec.openapis.org/oas/ontology#KafkaChannel> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#KafkaChannel> <http://spec.openapis.org/oas/ontology#hasSearchKey> "kafkachannel" .
+
+<http://spec.openapis.org/oas/ontology#Document> <http://www.w3.org/2000/01/rdf-schema#label> "document" .
+
+<http://spec.openapis.org/oas/ontology#Document> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#Document> <http://spec.openapis.org/oas/ontology#hasSearchKey> "document" .
+
+<http://spec.openapis.org/oas/ontology#DbTable> <http://www.w3.org/2000/01/rdf-schema#label> "db table" .
+
+<http://spec.openapis.org/oas/ontology#DbTable> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#DbTable> <http://spec.openapis.org/oas/ontology#hasSearchKey> "dbtable" .
+
+<http://spec.openapis.org/oas/ontology#DbSchemaType> <http://www.w3.org/2000/01/rdf-schema#label> "db schema type" .
+
+<http://spec.openapis.org/oas/ontology#DbSchemaType> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#DbSchemaType> <http://spec.openapis.org/oas/ontology#hasSearchKey> "dbschematype" .
+
+<http://spec.openapis.org/oas/ontology#DbReference> <http://www.w3.org/2000/01/rdf-schema#label> "db reference" .
+
+<http://spec.openapis.org/oas/ontology#DbReference> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#DbReference> <http://spec.openapis.org/oas/ontology#hasSearchKey> "dbreference" .
+
+<http://spec.openapis.org/oas/ontology#DbRefAttribute> <http://www.w3.org/2000/01/rdf-schema#label> "db ref attribute" .
+
+<http://spec.openapis.org/oas/ontology#DbRefAttribute> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#DbRefAttribute> <http://spec.openapis.org/oas/ontology#hasSearchKey> "dbrefattribute" .
+
+<http://spec.openapis.org/oas/ontology#DbIndex> <http://www.w3.org/2000/01/rdf-schema#label> "db index" .
+
+<http://spec.openapis.org/oas/ontology#DbIndex> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#DbIndex> <http://spec.openapis.org/oas/ontology#hasSearchKey> "dbindex" .
+
+<http://spec.openapis.org/oas/ontology#DbField> <http://www.w3.org/2000/01/rdf-schema#label> "db field" .
+
+<http://spec.openapis.org/oas/ontology#DbField> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#DbField> <http://spec.openapis.org/oas/ontology#hasSearchKey> "dbfield" .
+
+<http://spec.openapis.org/oas/ontology#AsyncMessage> <http://www.w3.org/2000/01/rdf-schema#label> "async message" .
+
+<http://spec.openapis.org/oas/ontology#AsyncMessage> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .
+
+<http://spec.openapis.org/oas/ontology#AsyncMessage> <http://spec.openapis.org/oas/ontology#hasSearchKey> "asyncmessage" .
