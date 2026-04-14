@@ -69,10 +69,10 @@ Database Markup Language — парсер извлекает:
 ```json
 {
   "nodes": [
-    {"id": "openapi_petstore_api_pets", "label": "/api/pets", "type": "endpoint", "file": "petstore.yaml"},
-    {"id": "openapi_petstore_pet", "label": "Pet", "type": "schema", "file": "petstore.yaml"},
-    {"id": "dbml_kful_schema_kful_opportunities", "label": "kful_schema.kful_opportunities", "type": "table", "file": "schema.dbml"},
-    {"id": "plantuml_search_получение_запроса", "label": "Получение запроса на поиск данных", "type": "action", "file": "search.puml"}
+    {"id": "openapi_petstore_api_pets", "label": "/api/pets", "type": "endpoint", "source_file": "petstore.yaml"},
+    {"id": "openapi_petstore_pet", "label": "Pet", "type": "schema", "source_file": "petstore.yaml"},
+    {"id": "dbml_kful_schema_kful_opportunities", "label": "kful_schema.kful_opportunities", "type": "table", "source_file": "schema.dbml"},
+    {"id": "plantuml_search_получение_запроса", "label": "Получение запроса на поиск данных", "type": "action", "source_file": "search.puml"}
   ],
   "edges": [
     {"source": "openapi_petstore_api_pets", "target": "openapi_petstore_pet", "type": "references", "label": "$ref"}
