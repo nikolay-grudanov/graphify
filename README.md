@@ -100,6 +100,46 @@ graphify автоматически определяет `.yaml`, `.yml`, `.dbml
 
 Multi-file спецификации обрабатываются автоматически — если `$ref` ссылается на соседний файл, он будет рекурсивно подтянут.
 
+## Онтологический маппинг
+
+Модуль `ontology_mapper` сопоставляет ноды графа graphify с классами OWL-онтологии и генерирует обогащённый граф в формате Turtle (`.ttl`).
+
+### Установка
+
+```bash
+# Базовая установка (без rdflib)
+uv tool install git+https://github.com/nikolay-grudanov/graphify.git@feature/custom-artifact-parsers
+
+# С поддержкой онтологии
+uv tool install "graphifyy[ontology] @ git+https://github.com/nikolay-grudanov/graphify.git@feature/custom-artifact-parsers"
+```
+
+### Использование
+
+```bash
+# Сначала строим граф
+graphify update ./my-project
+
+# Затем маппим на онтологию
+graphify ontology graphify-out/graph.json --ttl graphify/resources/ontology/ontology.ttl
+
+# С обогащённым JSON
+graphify ontology graphify-out/graph.json --ttl ontology.ttl --json --base-uri http://my-project.local/graph#
+```
+
+### Таблица маппинга
+
+| file_type graphify | OWL-класс онтологии |
+|-------------------|---------------------|
+| document (.md) | oas:Document |
+| openapi (.yaml) | oas:Service |
+| asyncapi (.yaml) | oas:KafkaChannel |
+| dbml (.dbml) | oas:DbTable |
+| code (.py, .ts, .java) | oas:Schema |
+| plantuml (.puml) | oas:Document |
+
+Подробнее: [`CUSTOM_PARSERS.md`](CUSTOM_PARSERS.md)
+
 ## Тесты
 
 ```bash

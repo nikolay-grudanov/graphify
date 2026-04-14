@@ -2,6 +2,23 @@
 
 Full release notes with details on each version: [GitHub Releases](https://github.com/safishamsi/graphify/releases)
 
+## [Unreleased] — feature/custom-artifact-parsers
+
+### Added
+- **Онтологический маппинг** — модуль `ontology_mapper` для сопоставления графа graphify с OWL-онтологией
+  - `graphify ontology` CLI-команда
+  - Генерация Turtle (.ttl) и обогащённого JSON
+  - Таблица маппинга `ontology_rules.py` — расширяемая без правки основной логики
+  - Optional dependency `rdflib` через `pip install graphifyy[ontology]`
+- **Парсеры архитектурных артефактов** — OpenAPI, AsyncAPI, DBML, PlantUML
+  - Cross-file `$ref` resolver для multi-file спецификаций
+  - PlantUML: class/component, sequence, activity диаграммы
+  - Enterprise DBML: quoted identifiers, inline refs, named FKs
+
+### Fixed
+- `_make_id()` — сохранение Unicode/кириллических символов в node ID
+- `source_file` вместо `file` в AST-нодах кастомных парсеров
+
 ## 0.4.11 (2026-04-13)
 
 - Fix: `graphify query` no longer crashes with `ValueError` on MultiGraph graphs — `G.edges[u, v]` replaced with `G[u][v]` + MultiGraph guard (#305)
