@@ -772,6 +772,11 @@ def main() -> None:
         print("    --type T                query type: query|path_query|explain (default: query)")
         print("    --nodes N1 N2 ...       source node labels cited in the answer")
         print("    --memory-dir DIR        memory directory (default: graphify-out/memory)")
+        print("  ontology <graph.json>   map graph nodes to OWL classes using an ontology")
+        print("    --ttl PATH              path to ontology.ttl (required)")
+        print("    --out PATH              output TTL path (default: graph_ontology.ttl)")
+        print("    --json                  also output enriched JSON with OWL annotations")
+        print("    --base-uri URI          base URI for resources (default: http://project.local/graph#)")
         print("  benchmark [graph.json]  measure token reduction vs naive full-corpus approach")
         print("  hook install            install post-commit/post-checkout git hooks (all platforms)")
         print("  hook uninstall          remove git hooks")
@@ -1157,6 +1162,31 @@ def main() -> None:
             print("Code graph updated. For doc/paper/image changes run /graphify --update in your AI assistant.")
         else:
             print("Nothing to update or rebuild failed — check output above.")
+
+    elif cmd == "ontology":
+        # graphify ontology <graph.json> --ttl <ontology.ttl> [--out <output.ttl>] [--json] [--base-uri <uri>]
+        import argparse as _ap
+        p = _ap.ArgumentParser(prog="graphify ontology")
+        p.add_argument("graph", help="Path to graph.json")
+        p.add_argument("--ttl", required=True, help="Path to ontology.ttl")
+        p.add_argument("--out", default=None, help="Output TTL path (default: graph_ontology.ttl alongside graph.json)")
+        p.add_argument("--json", dest="output_json", action="store_true", help="Also output enriched JSON")
+        p.add_argument("--base-uri", default="http://project.local/graph#", help="Base URI for graph resources")
+        args = p.parse_args(sys.argv[2:])
+
+        graph_path = Path(args.graph)
+        ttl_path = Path(args.ttl)
+        out_path = Path(args.out) if args.out else None
+
+        if not graph_path.exists():
+            print(f"error: graph.json not found: {graph_path}", file=sys.stderr)
+            sys.exit(1)
+        if not ttl_path.exists():
+            print(f"error: ontology.ttl not found: {ttl_path}", file=sys.stderr)
+            sys.exit(1)
+
+        from graphify.ontology_mapper import run_mapping
+        run_mapping(graph_path, ttl_path, out_path, args.output_json, args.base_uri)
 
     elif cmd == "benchmark":
         from graphify.benchmark import run_benchmark, print_benchmark

@@ -2881,7 +2881,7 @@ def extract_openapi(path: Path) -> dict:
         nid = _make_id("openapi", path.stem, ntype, name)
         if nid not in seen_ids:
             seen_ids.add(nid)
-            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+            nodes.append({"id": nid, "label": name, "type": ntype, "source_file": str(path)})
         return nid
 
     # Extract path entries (endpoints)
@@ -2935,7 +2935,7 @@ def extract_asyncapi(path: Path) -> dict:
         nid = _make_id("asyncapi", path.stem, name)
         if nid not in seen_ids:
             seen_ids.add(nid)
-            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+            nodes.append({"id": nid, "label": name, "type": ntype, "source_file": str(path)})
         return nid
 
     # Extract channel entries
@@ -3006,7 +3006,7 @@ def extract_dbml(path: Path) -> dict:
         nid = _make_id("dbml", path.stem, name)
         if nid not in seen_ids:
             seen_ids.add(nid)
-            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+            nodes.append({"id": nid, "label": name, "type": ntype, "source_file": str(path)})
         return nid
 
     # Identifier pattern: matches both  word  and  "quoted word"
@@ -3096,7 +3096,7 @@ def extract_plantuml(path: Path) -> dict:
         nid = _make_id("puml", path.stem, name)
         if nid not in seen_ids:
             seen_ids.add(nid)
-            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+            nodes.append({"id": nid, "label": name, "type": ntype, "source_file": str(path)})
         return nid
 
     # Extract class, interface, component, actor declarations
@@ -3203,7 +3203,7 @@ def _resolve_external_refs(
         nid = _make_id(prefix, source_file.stem, ntype, name)
         if nid not in seen_ids:
             seen_ids.add(nid)
-            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(source_file)})
+            nodes.append({"id": nid, "label": name, "type": ntype, "source_file": str(source_file)})
         return nid
 
     # Find all external $ref (contain a file path, not starting with #)
@@ -3294,7 +3294,7 @@ def _parse_channel_file(
         nid = _make_id(prefix, path.stem, ntype, name)
         if nid not in seen_ids:
             seen_ids.add(nid)
-            nodes.append({"id": nid, "label": name, "type": ntype, "file": str(path)})
+            nodes.append({"id": nid, "label": name, "type": ntype, "source_file": str(path)})
         return nid
 
     # Extract address as channel name

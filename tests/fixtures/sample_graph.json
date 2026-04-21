@@ -1,0 +1,17 @@
+{
+  "nodes": [
+    {"id": "bond_types", "label": "Bond Types", "file_type": "document", "source_file": "dictionaries/IB/bond_types.md", "source_location": null, "author": null},
+    {"id": "calc_service", "label": "CalcService", "file_type": "code", "source_file": "services/calc.py", "source_location": "10:1", "author": "dev"},
+    {"id": "api_bonds", "label": "/api/bonds", "file_type": "openapi", "source_file": "openapi/bonds.yaml", "source_location": null, "author": null},
+    {"id": "opportunity_state", "label": "KFUL_OPPORTUNITY_STATE", "file_type": "asyncapi", "source_file": "kafka/channel.yaml", "source_location": null, "author": null},
+    {"id": "kful_schema", "label": "kful_opportunities", "file_type": "dbml", "source_file": "db/schema.dbml", "source_location": null, "author": null},
+    {"id": "unknown_type_node", "label": "Something", "file_type": "weird_format", "source_file": "weird/file.xyz", "source_location": null, "author": null},
+    {"id": "external_dep", "label": "requests", "file_type": "code", "source_file": null, "source_location": null, "author": null}
+  ],
+  "edges": [
+    {"source": "calc_service", "target": "bond_types", "relation": "references", "confidence": "EXTRACTED", "weight": 1.0},
+    {"source": "api_bonds", "target": "kful_schema", "relation": "foreign_key", "confidence": "EXTRACTED", "weight": 1.0},
+    {"source": "calc_service", "target": "external_dep", "relation": "imports", "confidence": "EXTRACTED", "weight": 1.0},
+    {"source": "unknown_type_node", "target": "bond_types", "relation": "totally_unknown_relation", "confidence": "LOW", "weight": 0.5}
+  ]
+}
